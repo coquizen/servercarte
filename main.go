@@ -37,6 +37,10 @@ func main() {
 	menuService := menu.Initialize(menuRepository)
 	menu.NewGinRoutes(menuService, ginHandler)
 
+	userRepository := user.NewGormDBRepository(gormDB)
+	userService := user.Initialize(userRepository)
+	user.NewGinRoutes(userService, ginHandler)
+
 	router := ginRouter.Initialize(routerC, ginHandler)
 	router.ListenAndServe()
 }
