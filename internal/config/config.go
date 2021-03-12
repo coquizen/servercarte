@@ -7,6 +7,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Settings contains configuration settings for connecting to the db.
+
+type Security struct {
+	Length        int  `yaml:"length" default:"8"`
+	MixedCase     bool `yaml:"mixed_case" default:"false"`
+	AlphaNum      bool `yaml:"alpha_num" default:"false"`
+	SpecialChar   bool `yaml:"special_char" default:"false"`
+	CheckPrevious bool `yaml:"check_previous" default:"true"`
+}
+
 type Router struct {
 	Host                string `yaml:"host" default:"127.0.0.1"`
 	Port                string `yaml:"port,omitempty" default:"8080"`
@@ -26,14 +36,15 @@ type Database struct {
 type config struct {
 	Database Database `yaml:"database"`
 	Server   Router   `yaml:"server"`
+	Security Security `yaml:"security"`
 }
 
 // LoadConfigFile loads the configuration from a local .yml into the struct
-func Load(filePath string) (Router, Database, error) {
+func Load(filePath string) (Router, Database, Security, error) {
 	var cfg config
 	f, err := os.Open(filePath)
 	if err != nil {
-		return cfg.Server, cfg.Database, fmt.Errorf("error loading config.yml: %v", err)
+		return cfg.Server, cfg.Database, cfg.Security, fmt.Errorf("error loading config.yml: %v", err)
 	}
 
 	defer f.Close()
@@ -41,8 +52,8 @@ func Load(filePath string) (Router, Database, error) {
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 	if err != nil {
-		return cfg.Server, cfg.Database, err
+		return cfg.Server, cfg.Database, cfg.Security, err
 	}
 
-	return cfg.Server, cfg.Database, nil
+	return cfg.Server, cfg.Database, cfg.Security, nil
 }
