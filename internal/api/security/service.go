@@ -4,13 +4,9 @@ import (
 	"context"
 )
 
-type PasswordService interface {
-	Authenticate(context.Context, string, string) (bool, error)
-	IsValid(context.Context, string) error
-	Validate(context.Context, string, string) bool
-}
-
-type AuthenticationService interface {
+type Service interface {
+	ConfirmationChecker(ctx context.Context, password string, confirmPassword string) bool
+	Authenticate(context.Context, string, string) bool
 	Encrypt(context.Context, string) string
-	Token(context.Context, string) (string, error)
+	IsValid(context.Context, string) error
 }

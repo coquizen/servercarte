@@ -26,11 +26,15 @@ type PasswordPolicy struct {
 func Bind(policy PasswordPolicy) *Security {
 	return &Security{passwordPolicy: policy}
 }
+
 func Initialize(cfg config.Security) *Security {
 	policy := PasswordPolicy(cfg)
 	return Bind(policy)
 }
 
+func (s Security) ConfirmationChecker(_ context.Context, password, confirmPassword string) bool {
+	return password == confirmPassword
+}
 func (s Security) Authenticate(_ context.Context, hashedPW, givenPW string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPW), []byte(givenPW)) == nil
 }
