@@ -7,16 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	"github.com/CaninoDev/gastro/server/internal/authentication"
 	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
 type ginHandler struct {
 	svc Service
+	authSvc authentication.Service
 }
 
 // NewGinRoutes sets up menu API endpoint using Gin has the router.
-func NewGinRoutes(svc Service, r *gin.Engine) {
-	h := ginHandler{svc}
+func NewGinRoutes(svc Service, authSvc authentication.Service, r *gin.Engine, ) {
+	h := ginHandler{svc, authSvc}
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
 	menuViewGroup.GET("/sections", h.listSections)
@@ -24,7 +26,7 @@ func NewGinRoutes(svc Service, r *gin.Engine) {
 	menuViewGroup.GET("/items", h.listItems)
 	menuViewGroup.GET("/items/:id", h.findItemByID)
 
-	menuEditGroup := menuGroup.Group("")
+	menuEditGroup := menuGroup.Group("", )
 	menuEditGroup.POST("/sections", h.createSection)
 	menuEditGroup.PATCH("/sections/:id", h.updateSection)
 	menuEditGroup.DELETE("/sections/:id", h.deleteSection)
@@ -59,6 +61,7 @@ func (h *ginHandler) findSectionByID(ctx *gin.Context) {
 
 // createSection creates a new section.
 func (h *ginHandler) createSection(ctx *gin.Context) {
+
 	var section model.Section
 
 	if err := ctx.ShouldBindJSON(&section); err != nil {
