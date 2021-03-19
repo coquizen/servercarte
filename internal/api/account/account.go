@@ -3,39 +3,53 @@ package account
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/api/security"
 	"github.com/CaninoDev/gastro/server/internal/api/user"
+	"github.com/CaninoDev/gastro/server/internal/authentication"
 	"github.com/CaninoDev/gastro/server/internal/model"
+	"github.com/CaninoDev/gastro/server/internal/security"
 )
 // Account are the contracted methods to interact with GORM
 type Account struct {
 	accountRepo Repository
-	userRepo user.Repository
-	secSvc security.Security
+	userRepo    user.Repository
+	secSvc      security.Service
+	authSvc     authentication.Service
 }
 
-func Bind(accountRepo Repository, userRepo user.Repository, secSvc security.Security) *Account {
+func Bind(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
+	authSvc authentication.Service) *Account {
 	return &Account{
-		accountRepo,userRepo, secSvc,
+		accountRepo,userRepo, secSvc, authSvc,
 	}
 }
 
-func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security.Security) *Account {
-	return Bind(accountRepo, userRepo, secSvc)
+func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
+	authSvc authentication.Service) *Account {
+	return Bind(accountRepo, userRepo, secSvc, authSvc)
 }
 
-func (a Account) Create(ctx context.Context, req *createRequest) error {
+func (a *Account) Create(ctx context.Context, req *createAccountRequest) error {
 	var newUser model.User
 	newUser.FirstName = req.FirstName
 	newUser.LastName = req.LastName
-	newUser.Addr = req.Addr
+	newUser.Address1 = req.Address1
+	newUser.Address2 = req.Address2
 	newUser.ZipCode = req.ZipCode
 	newUser.Email = req.Email
 	if err := a.userRepo.View(ctx, &newUser); err == nil {
 		return errors.New("account already exists")
+	}
+
+	if a.secSvc.ConfirmationChecker(ctx, req.Password, req.PasswordConfirm) == false {
+		return errors.New("passwords don't match")
+	}
+
+	if err := a.secSvc.IsValid(ctx, req.Password); err != nil {
+		return err
 	}
 
 	var newAccount model.Account
@@ -43,19 +57,16 @@ func (a Account) Create(ctx context.Context, req *createRequest) error {
 	if err := a.accountRepo.Find(ctx, &newAccount); err == nil {
 		return errors.New("username already exists")
 	}
-	if req.Password != req.PasswordConfirm {
-		return errors.New("passwords don't match")
-	}
-	if err := a.secSvc.IsValid(ctx, req.Password); err != nil {
-		return err
-	}
 
-	newAccount.Password = a.secSvc.Encrypt(ctx, req.Password)
+
+
+	newAccount.Password = a.secSvc.Hash(ctx, req.Password)
 
 	if err := a.userRepo.Create(ctx, &newUser); err != nil {
 		return err
 	}
 	newAccount.UserID = newUser.ID
+
 	if err := a.accountRepo.Create(ctx, &newAccount); err != nil {
 		return err
 	}
@@ -63,21 +74,65 @@ func (a Account) Create(ctx context.Context, req *createRequest) error {
 
 }
 
-func (a Account) ChangePassword(ctx context.Context, req passwordChangeRequest, userName string) error {
+func (a *Account) Authenticate(ctx context.Context, username, password string) (string, error) {
 	var acct model.Account
-	acct.Username = userName
-	if req.NewPassword != req.NewPasswordConfirm {
+	acct.Username = username
+
+	if err := a.accountRepo.Find(ctx, &acct); err != nil {
+		return "", err
+	}
+
+	if !a.secSvc.VerifyPasswordMatches(ctx, acct.Password, password) {
+		return "", errors.New("unauthorized")
+	}
+
+	token, err := a.authSvc.GenerateToken(ctx, &acct)
+	if err != nil {
+		return "", err
+	}
+
+	acct.LastLogin = time.Now()
+	acct.Token = token
+
+	if err := a.accountRepo.Update(ctx, &acct); err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func (a *Account) FindByUsername(ctx context.Context, username string) (*model.Account, error) {
+	var acct model.Account
+	acct.Username = username
+	if err := a.accountRepo.Find(ctx, &acct); err != nil {
+		return &model.Account{}, err
+	}
+	return &acct, nil
+}
+
+func (a *Account) FindByToken(ctx context.Context, token string) (*model.Account, error) {
+	var acct model.Account
+	acct.Token = token
+	if err := a.accountRepo.Find(ctx, &acct); err != nil {
+		return &model.Account{}, err
+	}
+	return &acct, nil
+}
+
+func (a *Account) ChangePassword(ctx context.Context, username, oldPassword, newPassword, confirmNewPassword string) error {
+	var acct model.Account
+	acct.Username = username
+	if newPassword != confirmNewPassword {
 		return errors.New("passwords don't match")
 	}
 
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
 		return err
 	}
-	if ! a.secSvc.Authenticate(ctx, acct.Password, req.OldPassword) {
+	if !a.secSvc.VerifyPasswordMatches(ctx, acct.Password, oldPassword) {
 		return errors.New("password incorrect")
 	}
 
-	encryptedPW := a.secSvc.Encrypt(ctx, req.NewPassword)
+	encryptedPW := a.secSvc.Hash(ctx, newPassword)
 	acct.Password = encryptedPW
 	if err := a.accountRepo.Update(ctx, &acct); err != nil {
 		return err
@@ -86,7 +141,7 @@ func (a Account) ChangePassword(ctx context.Context, req passwordChangeRequest, 
 }
 
 // Delete will delete the intended account
-func (a Account) Delete(ctx context.Context, id string, passWord string) error {
+func (a *Account) Delete(ctx context.Context, id string, passWord string) error {
 	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("malformed id")
@@ -97,11 +152,70 @@ func (a Account) Delete(ctx context.Context, id string, passWord string) error {
 		return err
 	}
 
-	if ! a.secSvc.Authenticate(ctx, acct.Password, passWord) {
+	if ! a.secSvc.VerifyPasswordMatches(ctx, acct.Password, passWord) {
 		return errors.New("password incorrect")
 	}
 
 	if err := a.accountRepo.Delete(ctx, &acct); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *Account) RefreshAuthorization(ctx context.Context) error {
+	claims := ctx.Value(authentication.AUTH_PROPS).(authentication.CustomClaims)
+	var acct model.Account
+	acct.Username = claims.Username
+	if err := a.accountRepo.Find(ctx, &acct); err != nil {
+		return err
+	}
+
+	token, err := a.authSvc.GenerateToken(ctx, &acct)
+	if err == nil {
+		return err
+	}
+	acct.Token = token
+	if err := a.accountRepo.Update(ctx, &acct); err != nil {
+		return err
+	}
+	return errors.New("unauthorized; please re-login")
+}
+
+func (a *Account) List(ctx context.Context) (*[]model.Account, error) {
+	var accounts []model.Account
+	if err := a.accountRepo.All(ctx, &accounts); err != nil {
+		return &accounts, err
+	}
+	return &accounts, nil
+}
+
+func (a *Account) Update(ctx context.Context, rawID string, request *updateAccountRequest) error {
+	var account model.Account
+	id, err := uuid.Parse(rawID)
+	if err != nil {
+		return err
+	}
+	account.ID = id
+	if err := a.accountRepo.Find(ctx, &account); err != nil {
+		return err
+	}
+	account.Role = request.Role
+	account.Username = request.Username
+	if err := a.accountRepo.Update(ctx, &account); err != nil {
+		return err
+	}
+	var user model.User
+	user.ID = account.UserID
+	if err := a.userRepo.View(ctx, &user); err != nil {
+		return err
+	}
+	user.FirstName = request.FirstName
+	user.LastName = request.LastName
+	user.Address1 = request.Address1
+	user.Address2 = request.Address2
+	user.ZipCode = request.ZipCode
+	user.Email = request.Email
+	if err := a.userRepo.Update(ctx, &user); err != nil {
 		return err
 	}
 	return nil
