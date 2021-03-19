@@ -40,7 +40,7 @@ func (a *Account) Create(ctx context.Context, req *createAccountRequest) error {
 	newUser.Address2 = req.Address2
 	newUser.ZipCode = req.ZipCode
 	newUser.Email = req.Email
-	if err := a.userRepo.View(ctx, &newUser); err == nil {
+	if err := a.userRepo.Search(ctx, &newUser); err == nil {
 		return errors.New("account already exists")
 	}
 
