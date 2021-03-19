@@ -40,14 +40,15 @@ func (h *ginHandler) view(ctx *gin.Context) {
 }
 
 type updateReq struct {
-	FirstName string `json:"first_name,omitempty" gormDB:"unique,not null"`
-	LastName  string `json:"last_name,omitempty" gormDB:"unique,not null"`
-	Addr   string `json:"address" gormDB:"not null"`
-	ZipCode   uint   `json:"zip_code" gormDB:"not null"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
+	Address1   string `json:"address_1"`
+	Address2  string `json:"address_2"`
+	ZipCode   uint   `json:"zip_code"`
 }
 
 func (h ginHandler) update(ctx *gin.Context) {
-	var req = new(updateReq)
+	var req updateReq
 	id := ctx.Param("id")
 	if err := ctx.ShouldBindJSON(req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -59,7 +60,8 @@ func (h ginHandler) update(ctx *gin.Context) {
 	updateUser := &model.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		Addr:   req.Addr,
+		Address1:  req.Address1,
+		Address2: req.Address2,
 		ZipCode:   req.ZipCode,
 	}
 	updateUser.ID = parsedID
