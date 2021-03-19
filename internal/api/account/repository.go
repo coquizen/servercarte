@@ -9,8 +9,9 @@ import (
 // Repository describes the expected behavior for the data persistence of
 // account information.
 type Repository interface {
-	Create(context.Context, *model.Account) error
-	Find(context.Context, *model.Account) error
-	Update(context.Context, *model.Account) error
-	Delete(context.Context, *model.Account) error
+	All(ctx context.Context, accounts *[]model.Account) error
+	Create(ctx context.Context, account *model.Account) error
+	Find(ctx context.Context, account *model.Account) error
+	Update(ctx context.Context, account *model.Account) error
+	Delete(ctx context.Context, account *model.Account) error
 }

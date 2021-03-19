@@ -18,6 +18,9 @@ func NewGormDBRepository(db *gorm.DB) *GormDBRepository {
 	return &GormDBRepository{db}
 }
 
+func (a *GormDBRepository) All(ctx context.Context, accounts *[]model.Account) error {
+	return a.db.Find(&accounts).Error
+}
 func (a *GormDBRepository) Create(ctx context.Context, account *model.Account) error {
 	return a.db.Create(&account).Error
 }
