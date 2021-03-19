@@ -33,18 +33,27 @@ type Database struct {
 	Name string `yaml:"name,omitempty"`
 }
 
+type Authentication struct {
+	Algorithm        string `yaml:"algorithm"`
+	ExpirationPeriod int    `yaml:"expiration_period"`
+	MinKeyLength     int    `yaml:"minimum_key_length"`
+	SecretKey        string `yaml:"secret_key"`
+}
+
 type config struct {
-	Database Database `yaml:"database"`
-	Server   Router   `yaml:"server"`
-	Security Security `yaml:"security"`
+	Database       Database       `yaml:"database"`
+	Server         Router         `yaml:"server"`
+	Security       Security       `yaml:"security"`
+	Authentication Authentication `yaml:"authentication"`
 }
 
 // LoadConfigFile loads the configuration from a local .yml into the struct
-func Load(filePath string) (Router, Database, Security, error) {
+func Load(filePath string) (Router, Database, Security, Authentication, error) {
 	var cfg config
 	f, err := os.Open(filePath)
 	if err != nil {
-		return cfg.Server, cfg.Database, cfg.Security, fmt.Errorf("error loading config.yml: %v", err)
+		return cfg.Server, cfg.Database, cfg.Security, cfg.Authentication, fmt.Errorf("error loading config.yml: %v",
+			err)
 	}
 
 	defer f.Close()
@@ -52,8 +61,8 @@ func Load(filePath string) (Router, Database, Security, error) {
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 	if err != nil {
-		return cfg.Server, cfg.Database, cfg.Security, err
+		return cfg.Server, cfg.Database, cfg.Security, cfg.Authentication, err
 	}
 
-	return cfg.Server, cfg.Database, cfg.Security, nil
+	return cfg.Server, cfg.Database, cfg.Security, cfg.Authentication, nil
 }
