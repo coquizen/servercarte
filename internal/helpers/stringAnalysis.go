@@ -1,6 +1,11 @@
 package helpers
 
-import "unicode"
+import (
+	"regexp"
+	"unicode"
+)
+
+var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // HasMixedCase verifies if a string has both upper and lower case characters.
 func HasMixedCase(str string) bool {
@@ -52,4 +57,11 @@ func HasAlphaNum(str string) bool {
 		}
 	}
 	return false
+}
+
+func IsEmailFormat(str string) bool {
+	if len(str) < 3 && len(str) > 254 {
+		return false
+	}
+	return emailRegex.MatchString(str)
 }
