@@ -132,15 +132,7 @@ func (a *JWT) TokenValid(req *http.Request) error {
 	return nil
 }
 
-// ExtractToken extracts the token string from the request header
-func (a *JWT) ExtractToken(req *http.Request) string {
-	bearerToken := req.Header.Get("Authorization")
-	stringArray := strings.Split(bearerToken, " ")
-	if len(stringArray) == 2 {
-		return stringArray[1]
-	}
-	return ""
-}
+
 
 // parseToken reads the header string and parses the token as encoded by GenerateToken
 func (a *JWT) parseToken(req *http.Request) (*jwt.Token, error) {
@@ -152,14 +144,18 @@ func (a *JWT) parseToken(req *http.Request) (*jwt.Token, error) {
 		return a.secretKey, nil
 	})
 }
+// ExtractToken extracts the token string from the request header
+func (a *JWT) ExtractToken(req *http.Request) string {
+	authorizatioHeader := req.Header.Get("Authorization")
+	if authorizatioHeader != "" {
+		bearerToken := strings.Split(authorizatioHeader, " ")
+		if len(bearerToken) == 2 {
+			return bearerToken[1]
+		}
+	}
+	return ""
+}
 
-// ExtractAccountIDFromToken parses AccountID from enduser's token
-// func (i *JWT) ExtractAccountIDFromToken(req *http.Request) uuid.UUID {
-// 	tokenString := i.ExtractToken(req)
-// 	token, err := jwt.ParseWithClaims(tokenString, &jwtWrappedClaims{}, func(token *jwt.Token) (interface{}, error) {
-// 		return
-// 	})
-// }
 // ExtractTokenClaims extracts the claims as encoded in the token
 func (a *JWT) ExtractTokenClaims(req *http.Request) (authentication.CustomClaims, error) {
 	token, err := a.verifyToken(req)

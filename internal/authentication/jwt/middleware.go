@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -13,19 +14,21 @@ import (
 
 
 func (a *JWT) Middleware() gin.HandlerFunc {
-
 		return func(ctx *gin.Context) {
-		token, err := a.parseToken(ctx.Request)
-		if err != nil {
-			http.Error(ctx.Writer, "unable to parse token", http.StatusUnauthorized)
-			return
-		}
-		if isTokenExpired(*token) == true {
-			http.Error(ctx.Writer, "token has expired", http.StatusUnauthorized)
-			return
-		}
-		provisionClaimsToContext(ctx, token)
-		ctx.Next()
+			token, err := a.parseToken(ctx.Request)
+			if err != nil {
+				ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("No authorization header provided: %v", err))
+			}
+
+			if isTokenExpired(*token) == true {
+				ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Token has expired: %v", err))
+			}
+			if token.Valid {
+				provisionClaimsToContext(ctx, token)
+				ctx.Next()
+			}
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			ctx.Next()
 		}
 }
 
