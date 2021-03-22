@@ -5,8 +5,8 @@ import (
 	"github.com/CaninoDev/gastro/server/api/account"
 	"github.com/CaninoDev/gastro/server/api/menu"
 	"github.com/CaninoDev/gastro/server/api/user"
-	"github.com/CaninoDev/gastro/server/internal/db/gormDB"
 	"github.com/CaninoDev/gastro/server/internal/security/bcrypto"
+	"github.com/CaninoDev/gastro/server/internal/storage/gormDB"
 	"github.com/CaninoDev/gastro/server/internal/transport/ginHTTP"
 	"log"
 
