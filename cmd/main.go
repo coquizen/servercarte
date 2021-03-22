@@ -6,6 +6,7 @@ import (
 	"github.com/CaninoDev/gastro/server/api/menu"
 	"github.com/CaninoDev/gastro/server/api/user"
 	"github.com/CaninoDev/gastro/server/internal/db/gormDB"
+	"github.com/CaninoDev/gastro/server/internal/security/bcrypto"
 	"github.com/CaninoDev/gastro/server/internal/transport/ginHTTP"
 	"log"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/config"
 	"github.com/CaninoDev/gastro/server/internal/logger"
 	"github.com/CaninoDev/gastro/server/internal/router/ginRouter"
-	"github.com/CaninoDev/gastro/server/internal/security"
 )
 
 var (
@@ -38,7 +38,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	passwordService := security.Initialize(securityC)
+	passwordService := bcrypto.Initialize(securityC)
 
 	ginHandler := ginRouter.NewGinEngineHandler()
 
