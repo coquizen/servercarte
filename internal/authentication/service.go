@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/helpers"
 	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
@@ -35,15 +34,5 @@ type Service interface {
 	TokenValid(req *http.Request) error
 	Middleware() gin.HandlerFunc
 }
-
-
-func verifyExpiry(now int64, tokenExpiry int64) bool {
-	return now <= tokenExpiry
-}
-
-func verifyEmailFormat(tokenEmail string) bool {
-	return helpers.IsEmailFormat(tokenEmail)
-}
-
 
 
