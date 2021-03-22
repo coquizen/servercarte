@@ -1,4 +1,4 @@
-package gin
+package ginHTTP
 
 import (
 	"github.com/CaninoDev/gastro/server/api/user"
@@ -10,12 +10,13 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
-type ginHandler struct {
+type userHandler struct {
 	svc user.Service
 }
 
-func NewGinRoutes(svc user.Service, r *gin.Engine) {
-	h := ginHandler{svc}
+// NewUserRoutes setups the api endpoint for the user
+func NewUserRoutes(svc user.Service, r *gin.Engine) {
+	h := userHandler{svc}
 	userGroup := r.Group("/user")
 	userGroup.GET("/:id", h.view)
 	userGroup.PATCH("/:id", h.update)
@@ -24,7 +25,7 @@ func NewGinRoutes(svc user.Service, r *gin.Engine) {
 }
 
 // TODO: use the jwt token to unwrap claims of the currently logged in user
-func (h *ginHandler) view(ctx *gin.Context) {
+func (h *userHandler) view(ctx *gin.Context) {
 	id := ctx.Param("id")
 	parsedID, err := uuid.Parse(id)
 	if err != nil {
@@ -48,7 +49,7 @@ type updateReq struct {
 	ZipCode   uint   `json:"zip_code"`
 }
 
-func (h ginHandler) update(ctx *gin.Context) {
+func (h userHandler) update(ctx *gin.Context) {
 	var req updateReq
 	id := ctx.Param("id")
 	if err := ctx.ShouldBindJSON(req); err != nil {
@@ -73,7 +74,7 @@ func (h ginHandler) update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": updateUser})
 }
 
-func (h ginHandler) delete(ctx *gin.Context) {
+func (h userHandler) delete(ctx *gin.Context) {
 	id := ctx.Param("id")
 	parsedID, err := uuid.Parse(id)
 	if err != nil {

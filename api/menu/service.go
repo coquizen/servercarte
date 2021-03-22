@@ -8,7 +8,7 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
-// service describes the expected behavior for manipulating menu data.
+// Service describes the expected behavior for manipulating menu data.
 type Service interface {
 	Sections(context.Context) (*[]model.Section, error)
 	SectionByID(context.Context, string) (*model.Section, error)

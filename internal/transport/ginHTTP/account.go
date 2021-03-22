@@ -1,23 +1,23 @@
-package gin
+package ginHTTP
 
 import (
 	"fmt"
 	"github.com/CaninoDev/gastro/server/api/account"
+	"github.com/CaninoDev/gastro/server/internal/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/CaninoDev/gastro/server/internal/authentication"
 )
 
-type handler struct {
+type accountHandler struct {
 	authSvc authentication.Service
 	svc     account.Service
 }
 
-// NewRoutes sets up menu API endpoint using Gin has the router.
-func NewRoutes(svc account.Service, authSvc authentication.Service, r *gin.Engine) {
-	h := handler{authSvc, svc}
+// NewAccountRoutes sets up menu API endpoint using Gin has the router.
+func NewAccountRoutes(svc account.Service, authSvc authentication.Service, r *gin.Engine) {
+	h := accountHandler{authSvc, svc}
 
 	// public routes
 	r.POST("/register", h.register)
@@ -32,15 +32,19 @@ func NewRoutes(svc account.Service, authSvc authentication.Service, r *gin.Engin
 }
 
 
-func (h *handler) register(ctx *gin.Context) {
-	var newAccount account.newAccountRequest
+func (h *accountHandler) register(ctx *gin.Context) {
+	var newAccount account.NewAccountRequest
 	if err := ctx.ShouldBindJSON(&newAccount); err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
+		if err := ctx.AbortWithError(http.StatusUnprocessableEntity, err).Error; err != nil {
+			logger.Error.Println(err)
+		}
 		return
 	}
 
 	if err := h.svc.New(ctx, newAccount); err != nil {
-		ctx.AbortWithError(http.StatusNotAcceptable, err)
+		if err := ctx.AbortWithError(http.StatusNotAcceptable, err).Error; err != nil {
+			logger.Error.Println(err)
+		}
 		return
 	}
 
@@ -53,7 +57,7 @@ type credentials struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func (h *handler) login(ctx *gin.Context) {
+func (h *accountHandler) login(ctx *gin.Context) {
 	var cred credentials
 	if err := ctx.ShouldBindJSON(&cred); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
@@ -68,7 +72,7 @@ func (h *handler) login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, authenticationToken)
 }
 
-func (h *handler) list(ctx *gin.Context) {
+func (h *accountHandler) list(ctx *gin.Context) {
 	accounts, err := h.svc.List(ctx)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -76,8 +80,8 @@ func (h *handler) list(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, accounts)
 }
 
-func (h *handler) update(ctx *gin.Context) {
-	var updateAccount account.updateAccountRequest
+func (h *accountHandler) update(ctx *gin.Context) {
+	var updateAccount account.UpdateAccountRequest
 	if err := ctx.ShouldBindJSON(&updateAccount); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, "invalid json")
 		return
@@ -103,7 +107,7 @@ type deleteRequest struct {
 	password string
 }
 
-func (h *handler) delete(ctx *gin.Context) {
+func (h *accountHandler) delete(ctx *gin.Context) {
 	var deleteReq deleteRequest
 	if err := ctx.ShouldBindJSON(&deleteReq); err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)

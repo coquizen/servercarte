@@ -2,14 +2,15 @@ package main
 
 import (
 	"flag"
+	"github.com/CaninoDev/gastro/server/api/account"
+	"github.com/CaninoDev/gastro/server/api/menu"
+	"github.com/CaninoDev/gastro/server/api/user"
+	"github.com/CaninoDev/gastro/server/internal/db/gormDB"
+	"github.com/CaninoDev/gastro/server/internal/transport/ginHTTP"
 	"log"
 
-	"github.com/CaninoDev/gastro/server/internal/api/account"
-	"github.com/CaninoDev/gastro/server/internal/api/menu"
-	"github.com/CaninoDev/gastro/server/internal/api/user"
 	"github.com/CaninoDev/gastro/server/internal/authentication/jwt"
 	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/db"
 	"github.com/CaninoDev/gastro/server/internal/logger"
 	"github.com/CaninoDev/gastro/server/internal/router/ginRouter"
 	"github.com/CaninoDev/gastro/server/internal/security"
@@ -41,18 +42,18 @@ func main() {
 
 	ginHandler := ginRouter.NewGinEngineHandler()
 
-	menuRepository := menu.NewGormDBRepository(gDB)
+	menuRepository := gormDB.NewMenuRepository(gDB)
 	menuService := menu.Initialize(menuRepository)
 
-	userRepository := user.NewGormDBRepository(gDB)
+	userRepository := gormDB.NewUserRepository(gDB)
 	userService := user.Initialize(userRepository)
 
-	accountRepository := account.NewGormDBRepository(gDB)
+	accountRepository := gormDB.NewAccountRepository(gDB)
 	accountService := account.Initialize(accountRepository, userRepository, passwordService, authService)
 
-	menu.NewGinRoutes(menuService, authService, ginHandler)
-	user.NewGinRoutes(userService, ginHandler)
-	account.NewRoutes(accountService, authService, ginHandler)
+	ginHTTP.NewMenuRoutes(menuService, authService, ginHandler)
+	ginHTTP.NewUserRoutes(userService, ginHandler)
+	ginHTTP.NewAccountRoutes(accountService, authService, ginHandler)
 
 	router := ginRouter.Initialize(routerC, ginHandler)
 

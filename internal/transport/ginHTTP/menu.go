@@ -1,4 +1,4 @@
-package gin
+package ginHTTP
 
 import (
 	"github.com/CaninoDev/gastro/server/api/menu"
@@ -12,14 +12,14 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
-type ginHandler struct {
+type menuHandler struct {
 	svc     menu.Service
 	authSvc authentication.Service
 }
 
-// NewGinRoutes sets up menu API endpoint using Gin has the router.
-func NewGinRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engine, ) {
-	h := ginHandler{svc, authSvc}
+// NewMenuRoutes sets up menu API endpoint using Gin has the router.
+func NewMenuRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engine, ) {
+	h := menuHandler{svc, authSvc}
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
 	menuViewGroup.GET("/sections", h.listSections)
@@ -37,7 +37,7 @@ func NewGinRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engin
 }
 
 // --- Sections --- //
-func (h *ginHandler) listSections(ctx *gin.Context) {
+func (h *menuHandler) listSections(ctx *gin.Context) {
 	sections, err := h.svc.Sections(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -48,7 +48,7 @@ func (h *ginHandler) listSections(ctx *gin.Context) {
 	return
 }
 
-func (h *ginHandler) findSectionByID(ctx *gin.Context) {
+func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	log.Printf("ID: %s", rawID)
 	section, err := h.svc.SectionByID(ctx, rawID)
@@ -61,7 +61,7 @@ func (h *ginHandler) findSectionByID(ctx *gin.Context) {
 }
 
 // createSection creates a new section.
-func (h *ginHandler) createSection(ctx *gin.Context) {
+func (h *menuHandler) createSection(ctx *gin.Context) {
 
 	var section model.Section
 
@@ -80,7 +80,7 @@ func (h *ginHandler) createSection(ctx *gin.Context) {
 
 
 // updateSection update section's data.
-func (h *ginHandler) updateSection(ctx *gin.Context) {
+func (h *menuHandler) updateSection(ctx *gin.Context) {
 	var section model.Section
 
 	if err := ctx.ShouldBindJSON(&section); err != nil {
@@ -104,7 +104,7 @@ func (h *ginHandler) updateSection(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": section})
 }
 
-func (h *ginHandler) deleteSection(ctx *gin.Context) {
+func (h *menuHandler) deleteSection(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	if err := h.svc.DeleteSection(ctx, rawID); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
@@ -116,7 +116,7 @@ func (h *ginHandler) deleteSection(ctx *gin.Context) {
 
 
 // ---  Item  --- //
-func (h *ginHandler) listItems(ctx *gin.Context) {
+func (h *menuHandler) listItems(ctx *gin.Context) {
 	items, err := h.svc.Items(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -128,7 +128,7 @@ func (h *ginHandler) listItems(ctx *gin.Context) {
 }
 
 // createSection creates a new section.
-func (h *ginHandler) createItem(ctx *gin.Context) {
+func (h *menuHandler) createItem(ctx *gin.Context) {
 	var item model.Item
 
 	if err := ctx.ShouldBindJSON(&item); err != nil {
@@ -145,7 +145,7 @@ func (h *ginHandler) createItem(ctx *gin.Context) {
 }
 
 // updateSection creates a new section.
-func (h *ginHandler) updateItem(ctx *gin.Context) {
+func (h *menuHandler) updateItem(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	id, err := uuid.Parse(rawID)
 	if err != nil {
@@ -167,7 +167,7 @@ func (h *ginHandler) updateItem(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"data": item})
 }
-func (h *ginHandler) findItemByID(ctx *gin.Context) {
+func (h *menuHandler) findItemByID(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	item, err := h.svc.ItemByID(ctx, rawID)
 	if err != nil {
@@ -178,7 +178,7 @@ func (h *ginHandler) findItemByID(ctx *gin.Context) {
 	return
 }
 
-func (h *ginHandler) deleteItem(ctx *gin.Context) {
+func (h *menuHandler) deleteItem(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 
 	if err := h.svc.DeleteItem(ctx, rawID); err != nil {

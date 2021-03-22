@@ -3,11 +3,11 @@ package account
 import (
 	"context"
 	"errors"
+	user2 "github.com/CaninoDev/gastro/server/api/user"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/api/user"
 	"github.com/CaninoDev/gastro/server/internal/authentication"
 	"github.com/CaninoDev/gastro/server/internal/model"
 	"github.com/CaninoDev/gastro/server/internal/security"
@@ -15,24 +15,24 @@ import (
 // Account are the contracted methods to interact with GORM
 type Account struct {
 	accountRepo Repository
-	userRepo    user.Repository
+	userRepo    user2.Repository
 	secSvc      security.Service
 	authSvc     authentication.Service
 }
 
-func Bind(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
+func Bind(accountRepo Repository, userRepo user2.Repository, secSvc security.Service,
 	authSvc authentication.Service) *Account {
 	return &Account{
 		accountRepo,userRepo, secSvc, authSvc,
 	}
 }
 
-func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
+func Initialize(accountRepo Repository, userRepo user2.Repository, secSvc security.Service,
 	authSvc authentication.Service) *Account {
 	return Bind(accountRepo, userRepo, secSvc, authSvc)
 }
 
-func (a *Account) New(ctx context.Context, req newAccountRequest) error {
+func (a *Account) New(ctx context.Context, req NewAccountRequest) error {
 	var newUser model.User
 	newUser.FirstName = req.FirstName
 	newUser.LastName = req.LastName
@@ -185,7 +185,7 @@ func (a *Account) List(ctx context.Context) (*[]model.Account, error) {
 	return &accounts, nil
 }
 
-func (a *Account) Update(ctx context.Context, id uuid.UUID, request updateAccountRequest) error {
+func (a *Account) Update(ctx context.Context, id uuid.UUID, request UpdateAccountRequest) error {
 	var account model.Account
 	account.ID = id
 	if err := a.accountRepo.Find(ctx, &account); err != nil {
