@@ -32,12 +32,12 @@ func Initialize(accountRepo Repository, userRepo user.Repository, secSvc securit
 	return Bind(accountRepo, userRepo, secSvc, authSvc)
 }
 
-func (a *Account) Create(ctx context.Context, req *createAccountRequest) error {
+func (a *Account) New(ctx context.Context, req newAccountRequest) error {
 	var newUser model.User
 	newUser.FirstName = req.FirstName
 	newUser.LastName = req.LastName
 	newUser.Address1 = req.Address1
-	newUser.Address2 = req.Address2
+	newUser.Address2 = *req.Address2
 	newUser.ZipCode = req.ZipCode
 	newUser.Email = req.Email
 	if err := a.userRepo.Search(ctx, &newUser); err == nil {
@@ -141,13 +141,9 @@ func (a *Account) ChangePassword(ctx context.Context, username, oldPassword, new
 }
 
 // Delete will delete the intended account
-func (a *Account) Delete(ctx context.Context, id string, passWord string) error {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return errors.New("malformed id")
-	}
+func (a *Account) Delete(ctx context.Context, id uuid.UUID, passWord string) error {
 	var acct model.Account
-	acct.ID = parsedID
+	acct.ID = id
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
 		return err
 	}
@@ -189,33 +185,25 @@ func (a *Account) List(ctx context.Context) (*[]model.Account, error) {
 	return &accounts, nil
 }
 
-func (a *Account) Update(ctx context.Context, rawID string, request *updateAccountRequest) error {
+func (a *Account) Update(ctx context.Context, id uuid.UUID, request updateAccountRequest) error {
 	var account model.Account
-	id, err := uuid.Parse(rawID)
-	if err != nil {
-		return err
-	}
 	account.ID = id
 	if err := a.accountRepo.Find(ctx, &account); err != nil {
 		return err
 	}
-	account.Role = request.Role
-	account.Username = request.Username
 	if err := a.accountRepo.Update(ctx, &account); err != nil {
 		return err
 	}
-	var user model.User
-	user.ID = account.UserID
-	if err := a.userRepo.View(ctx, &user); err != nil {
+	var updateUser model.User
+	updateUser.ID = account.UserID
+	if err := a.userRepo.View(ctx, &updateUser); err != nil {
 		return err
 	}
-	user.FirstName = request.FirstName
-	user.LastName = request.LastName
-	user.Address1 = request.Address1
-	user.Address2 = request.Address2
-	user.ZipCode = request.ZipCode
-	user.Email = request.Email
-	if err := a.userRepo.Update(ctx, &user); err != nil {
+	updateUser.Address1 = request.Address1
+	updateUser.Address2 = *request.Address2
+	updateUser.ZipCode = request.ZipCode
+	updateUser.Email = request.Email
+	if err := a.userRepo.Update(ctx, &updateUser); err != nil {
 		return err
 	}
 	return nil

@@ -90,8 +90,10 @@ func (h *handler) update(ctx *gin.Context) {
 	}
 	updateAccount.ID = claims.AccountID
 
-	if err := h.svc.Update(ctx, &updateAccount); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
+	if err := h.svc.Update(ctx, claims.AccountID, updateAccount); err != nil {
+		if err := ctx.AbortWithError(http.StatusBadRequest, err).Error; err != nil {
+			return
+		}
 	}
 	ctx.JSON(http.StatusOK, updateAccount)
 }
@@ -99,6 +101,7 @@ func (h *handler) update(ctx *gin.Context) {
 type deleteRequest struct {
 	password string
 }
+
 func (h *handler) delete(ctx *gin.Context) {
 	var deleteReq deleteRequest
 	if err := ctx.ShouldBindJSON(&deleteReq); err != nil {

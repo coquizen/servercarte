@@ -34,7 +34,7 @@ type Service interface {
 	New(ctx context.Context, newAccountDetails newAccountRequest) error
 	Authenticate(ctx context.Context, username string, password string) (string, error)
 	List(ctx context.Context) (*[]model.Account, error)
-	Update(ctx context.Context, request *updateAccountRequest) error
+	Update(ctx context.Context, accountID uuid.UUID, request updateAccountRequest) error
 	FindByUsername(ctx context.Context, username string) (*model.Account, error)
 	FindByToken(ctx context.Context, token string) (*model.Account, error)
 	Delete(ctx context.Context, accountID uuid.UUID, password string) error
