@@ -89,7 +89,7 @@ func SeedDatabase(db *gorm.DB) error {
 		Address1:  "31 Rue Cambon",
 		Address2:  "",
 		ZipCode:   75001,
-		Email:     "remy@Gusteaus.com",
+		Email:     "admin@Gusteaus.com",
 	}
 	db.Create(&adminUser)
 	password := "admin"
@@ -98,11 +98,59 @@ func SeedDatabase(db *gorm.DB) error {
 		Username:    "admin",
 		Password:    string(hashedPassword),
 		Role:        model.Admin,
-		Token:       "",
 	}
 	db.Create(&adminAccount)
 	if err := db.Model(&adminAccount).Association("User").Append(&adminUser); err != nil {
 		return err
 	}
+	logger.Info.Println("Successful")
+	logger.Info.Println("Creating employee account/user...")
+	employeeUser := model.User{
+		FirstName: "Remy",
+		LastName:  "Ratatouille",
+		Address1:  "10 Rue Egout",
+		Address2:  "",
+		ZipCode:   75002,
+		Email:     "remy@pixar.com",
+	}
+	db.Create(&employeeUser)
+	password = "employee"
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	employeeAccount := model.Account{
+		Username:    "employee",
+		Password:    string(hashedPassword),
+		Role:        model.Employee,
+	}
+	db.Create(&employeeAccount)
+	if err := db.Model(&employeeAccount).Association("User").Append(&employeeUser); err != nil {
+		return err
+	}
+	logger.Info.Println("Successful")
+	logger.Info.Println("Creating guest account/user...")
+	guestUser := model.User{
+		FirstName: "Anton",
+		LastName:  "Ego",
+		Address1:  "99 Tour D'Ivoire",
+		Address2:  "",
+		ZipCode:   75003,
+		Email:     "anton@divoire.com",
+	}
+
+	db.Create(&guestUser)
+	password = "guest"
+	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	guestAccount := model.Account{
+		Username:    "guest",
+		Password:    string(hashedPassword),
+		Role:        model.Guest,
+	}
+
+	db.Create(&guestAccount)
+	if err := db.Model(&guestAccount).Association("User").Append(&guestUser); err != nil {
+		return err
+	}
+
+	logger.Info.Println("Successful")
+
 	return nil
 }
