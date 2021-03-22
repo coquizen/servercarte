@@ -1,7 +1,8 @@
-package account
+package gin
 
 import (
 	"fmt"
+	"github.com/CaninoDev/gastro/server/api/account"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,11 +12,11 @@ import (
 
 type handler struct {
 	authSvc authentication.Service
-	svc Service
+	svc     account.Service
 }
 
 // NewRoutes sets up menu API endpoint using Gin has the router.
-func NewRoutes(svc Service, authSvc authentication.Service, r *gin.Engine) {
+func NewRoutes(svc account.Service, authSvc authentication.Service, r *gin.Engine) {
 	h := handler{authSvc, svc}
 
 	// public routes
@@ -32,7 +33,7 @@ func NewRoutes(svc Service, authSvc authentication.Service, r *gin.Engine) {
 
 
 func (h *handler) register(ctx *gin.Context) {
-	var newAccount newAccountRequest
+	var newAccount account.newAccountRequest
 	if err := ctx.ShouldBindJSON(&newAccount); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
@@ -76,7 +77,7 @@ func (h *handler) list(ctx *gin.Context) {
 }
 
 func (h *handler) update(ctx *gin.Context) {
-	var updateAccount updateAccountRequest
+	var updateAccount account.updateAccountRequest
 	if err := ctx.ShouldBindJSON(&updateAccount); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, "invalid json")
 		return

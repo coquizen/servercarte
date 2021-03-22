@@ -1,6 +1,7 @@
-package user
+package gin
 
 import (
+	"github.com/CaninoDev/gastro/server/api/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +11,10 @@ import (
 )
 
 type ginHandler struct {
-	svc Service
+	svc user.Service
 }
 
-func NewGinRoutes(svc Service, r *gin.Engine) {
+func NewGinRoutes(svc user.Service, r *gin.Engine) {
 	h := ginHandler{svc}
 	userGroup := r.Group("/user")
 	userGroup.GET("/:id", h.view)

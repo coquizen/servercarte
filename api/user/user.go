@@ -17,7 +17,7 @@ func Bind(repo Repository) *User {
 	return &User{repo: repo}
 }
 
-func Initialize(repo Repository) *User{
+func Initialize(repo Repository) *User {
 	return Bind(repo)
 }
 

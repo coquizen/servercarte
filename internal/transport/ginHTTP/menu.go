@@ -1,6 +1,7 @@
-package menu
+package gin
 
 import (
+	"github.com/CaninoDev/gastro/server/api/menu"
 	"log"
 	"net/http"
 
@@ -12,12 +13,12 @@ import (
 )
 
 type ginHandler struct {
-	svc Service
+	svc     menu.Service
 	authSvc authentication.Service
 }
 
 // NewGinRoutes sets up menu API endpoint using Gin has the router.
-func NewGinRoutes(svc Service, authSvc authentication.Service, r *gin.Engine, ) {
+func NewGinRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engine, ) {
 	h := ginHandler{svc, authSvc}
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
