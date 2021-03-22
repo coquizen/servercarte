@@ -9,7 +9,7 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/api/user"
 	"github.com/CaninoDev/gastro/server/internal/authentication/jwt"
 	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/db/gormDB"
+	"github.com/CaninoDev/gastro/server/internal/db"
 	"github.com/CaninoDev/gastro/server/internal/logger"
 	"github.com/CaninoDev/gastro/server/internal/router/ginRouter"
 	"github.com/CaninoDev/gastro/server/internal/security"
@@ -22,21 +22,20 @@ var (
 
 func main() {
 	flag.Parse()
-	routerC, databaseC, securityC, jwtC, err := config.Load(*configYAML)
+	routerC, databaseC, securityC, authC, err := config.Load(*configYAML)
 	if err != nil {
 		logger.Error.Fatalf("error parsing config.yml %v", err)
 	}
 
-	gDB, err := gormDB.Start(databaseC, *populateDatabase)
+	gDB, err := gormDB.Start(&databaseC, *populateDatabase)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	authService, err := jwt.New(jwtC)
+	authService, err := jwt.New(authC)
 	if err != nil {
 		log.Panic(err)
 	}
-
 
 	passwordService := security.Initialize(securityC)
 
@@ -45,16 +44,16 @@ func main() {
 	menuRepository := menu.NewGormDBRepository(gDB)
 	menuService := menu.Initialize(menuRepository)
 
-	menu.NewGinRoutes(menuService, authService, ginHandler)
-
 	userRepository := user.NewGormDBRepository(gDB)
 	userService := user.Initialize(userRepository)
-	user.NewGinRoutes(userService, ginHandler)
 
 	accountRepository := account.NewGormDBRepository(gDB)
-
 	accountService := account.Initialize(accountRepository, userRepository, passwordService, authService)
+
+	menu.NewGinRoutes(menuService, authService, ginHandler)
+	user.NewGinRoutes(userService, ginHandler)
 	account.NewRoutes(accountService, authService, ginHandler)
+
 	router := ginRouter.Initialize(routerC, ginHandler)
 
 	if err := router.ListenAndServe(); err != nil {
