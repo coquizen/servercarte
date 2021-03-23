@@ -1,0 +1,23 @@
+database:
+  type: mysql
+  host: localhost
+  port: 3306
+  user: <username>
+  pass: <password>
+  name: gastro
+server:
+  host: 127.0.0.1
+  port: 8080
+  read_timeout_seconds: 5
+  write_timeout_seconds: 5
+authentication:
+  algorithm: HS256
+  expiration_period: 4320
+  minimum_key_length: 128
+  secret_key: <randomString>
+security:
+  length: 8
+  mixed_case: false
+  alpha_num: false
+  special_char: false
+  check_previous: false
