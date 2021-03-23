@@ -6,31 +6,31 @@ import (
 	"time"
 
 	"github.com/CaninoDev/gastro/server/api"
-	authentication2 "github.com/CaninoDev/gastro/server/api/authentication"
-	security2 "github.com/CaninoDev/gastro/server/api/security"
+    "github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/api/security"
 	"github.com/CaninoDev/gastro/server/api/user"
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/authentication"
+
 )
 // Account are the contracted methods to interact with GORM
 type Account struct {
 	accountRepo Repository
 	userRepo    user.Repository
-	secSvc      security2.Service
-	authSvc     authentication2.Service
+	secSvc      security.Service
+	authSvc     authentication.Service
 }
 
-func Bind(accountRepo Repository, userRepo user.Repository, secSvc security2.Service,
-	authSvc authentication2.Service) *Account {
+func Bind(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
+	authSvc authentication.Service) *Account {
 	return &Account{
 		accountRepo,userRepo, secSvc, authSvc,
 	}
 }
 
-func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security2.Service,
-	authSvc authentication2.Service) *Account {
+func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
+	authSvc authentication.Service) *Account {
 	return Bind(accountRepo, userRepo, secSvc, authSvc)
 }
 
@@ -160,9 +160,9 @@ func (a *Account) Delete(ctx context.Context, id uuid.UUID, passWord string) err
 }
 
 func (a *Account) RefreshAuthorization(ctx context.Context) error {
-	claims := ctx.Value(authentication.AUTH_PROPS).(authentication2.CustomClaims)
+	userN := ctx.Value("username")
 	var acct api.Account
-	acct.Username = claims.Username
+	acct.Username = userN.(string)
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
 		return err
 	}
