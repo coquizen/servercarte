@@ -1,24 +1,24 @@
 package ginHTTP
 
 import (
-	"github.com/CaninoDev/gastro/server/api/menu"
 	"log"
 	"net/http"
 
+	"github.com/CaninoDev/gastro/server/api"
+	authentication2 "github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/api/menu"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"github.com/CaninoDev/gastro/server/internal/authentication"
-	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
 type menuHandler struct {
 	svc     menu.Service
-	authSvc authentication.Service
+	authSvc authentication2.Service
 }
 
 // NewMenuRoutes sets up menu API endpoint using Gin has the router.
-func NewMenuRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engine, ) {
+func NewMenuRoutes(svc menu.Service, authSvc authentication2.Service, r *gin.Engine, ) {
 	h := menuHandler{svc, authSvc}
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
@@ -63,12 +63,12 @@ func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 // createSection creates a new section.
 func (h *menuHandler) createSection(ctx *gin.Context) {
 	role, exists := ctx.Get("role")
-	if !exists || role != model.Admin {
+	if !exists || role != api.Admin {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	var section model.Section
+	var section api.Section
 
 	if err := ctx.ShouldBindJSON(&section); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -87,11 +87,11 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 // updateSection update section's data.
 func (h *menuHandler) updateSection(ctx *gin.Context) {
 	role, exists := ctx.Get("role")
-	if !exists || role != model.Admin {
+	if !exists || role != api.Admin {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	var section model.Section
+	var section api.Section
 
 	if err := ctx.ShouldBindJSON(&section); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -116,7 +116,7 @@ func (h *menuHandler) updateSection(ctx *gin.Context) {
 
 func (h *menuHandler) deleteSection(ctx *gin.Context) {
 	role, exists := ctx.Get("role")
-	if !exists || role != model.Admin {
+	if !exists || role != api.Admin {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -145,11 +145,11 @@ func (h *menuHandler) listItems(ctx *gin.Context) {
 // createSection creates a new section.
 func (h *menuHandler) createItem(ctx *gin.Context) {
 	role, exists := ctx.Get("role")
-	if !exists || role != model.Admin {
+	if !exists || role != api.Admin {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	var item model.Item
+	var item api.Item
 
 	if err := ctx.ShouldBindJSON(&item); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -167,7 +167,7 @@ func (h *menuHandler) createItem(ctx *gin.Context) {
 // updateSection creates a new section.
 func (h *menuHandler) updateItem(ctx *gin.Context) {
 	role, exists := ctx.Get("role")
-	if !exists || role != model.Admin {
+	if !exists || role != api.Admin {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -177,7 +177,7 @@ func (h *menuHandler) updateItem(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	var item model.Item
+	var item api.Item
 
 	if err := ctx.ShouldBindJSON(&item); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -205,7 +205,7 @@ func (h *menuHandler) findItemByID(ctx *gin.Context) {
 
 func (h *menuHandler) deleteItem(ctx *gin.Context) {
 	role, exists := ctx.Get("role")
-	if !exists || role != model.Admin {
+	if !exists || role != api.Admin {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

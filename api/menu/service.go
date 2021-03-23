@@ -5,22 +5,22 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/model"
+	"github.com/CaninoDev/gastro/server/api"
 )
 
 // Service describes the expected behavior for manipulating menu data.
 type Service interface {
-	Sections(context.Context) (*[]model.Section, error)
-	SectionByID(context.Context, string) (*model.Section, error)
-	NewSection(context.Context, *model.Section) error
-	UpdateSectionData(context.Context, *model.Section) error
-	ReParentSection(context.Context, *model.Section, uuid.UUID) error
+	Sections(context.Context) (*[]api.Section, error)
+	SectionByID(context.Context, string) (*api.Section, error)
+	NewSection(context.Context, *api.Section) error
+	UpdateSectionData(context.Context, *api.Section) error
+	ReParentSection(context.Context, *api.Section, uuid.UUID) error
 	DeleteSection(context.Context, string) error
-	Items(context.Context) (*[]model.Item, error)
-	ItemByID(context.Context, string) (*model.Item, error)
-	NewItem(context.Context, *model.Item) error
-	ReParentItem(context.Context, *model.Item, uuid.UUID) error
-	UpdateItemData(context.Context, *model.Item) error
+	Items(context.Context) (*[]api.Item, error)
+	ItemByID(context.Context, string) (*api.Item, error)
+	NewItem(context.Context, *api.Item) error
+	ReParentItem(context.Context, *api.Item, uuid.UUID) error
+	UpdateItemData(context.Context, *api.Item) error
 	DeleteItem(context.Context, string) error
 }
 

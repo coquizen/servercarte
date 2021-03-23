@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/model"
+	"github.com/CaninoDev/gastro/server/api"
 )
 
 
 // Service represents the user application interface
 type Service interface {
-	View(context.Context, uuid.UUID) (*model.User, error)
-	Find(context.Context, *model.User) error
-	Update(context.Context, *model.User) error
+	View(context.Context, uuid.UUID) (*api.User, error)
+	Find(context.Context, *api.User) error
+	Update(context.Context, *api.User) error
 	Delete(context.Context, uuid.UUID) error
 }

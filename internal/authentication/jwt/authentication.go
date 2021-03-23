@@ -11,9 +11,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/authentication"
+	"github.com/CaninoDev/gastro/server/api"
+	authentication2 "github.com/CaninoDev/gastro/server/api/authentication"
 	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
 type JWT struct {
@@ -36,7 +36,7 @@ type Token struct {
 }
 type jwtWrappedClaims struct {
 	jwt.StandardClaims
-	authentication.CustomClaims
+	authentication2.CustomClaims
 }
 
 func (j jwtWrappedClaims) Valid() error {
@@ -82,10 +82,10 @@ func New(cfg config.Authentication) (*JWT, error) {
 }
 
 // GenerateToken generates a token with cstClaims encoded
-func (a *JWT) GenerateToken(ctx context.Context, acct *model.Account) (string, error) {
+func (a *JWT) GenerateToken(ctx context.Context, acct *api.Account) (string, error) {
 	now := time.Now().Unix()
 	exp := time.Now().Add(a.expirationPeriod).Unix()
-	cstClaims := authentication.CustomClaims{
+	cstClaims := authentication2.CustomClaims{
 		AccountID: acct.ID,
 		Username:  acct.Username,
 		Role:      acct.Role,
@@ -161,15 +161,15 @@ func (a *JWT) ExtractToken(req *http.Request) string {
 }
 
 // ExtractTokenClaims extracts the claims as encoded in the token
-func (a *JWT) ExtractTokenClaims(req *http.Request) (authentication.CustomClaims, error) {
+func (a *JWT) ExtractTokenClaims(req *http.Request) (authentication2.CustomClaims, error) {
 	token, err := a.verifyToken(req)
 	if err != nil {
-		return authentication.CustomClaims{}, err
+		return authentication2.CustomClaims{}, err
 	}
 	claims, ok := token.Claims.(jwtWrappedClaims) //the token claims should conform to MapClaims
 	if ok && token.Valid {
-		return authentication.CustomClaims(claims.CustomClaims), nil
+		return authentication2.CustomClaims(claims.CustomClaims), nil
 	}
-	return authentication.CustomClaims{}, err
+	return authentication2.CustomClaims{}, err
 }
 

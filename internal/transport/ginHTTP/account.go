@@ -2,26 +2,25 @@ package ginHTTP
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/api/account"
-	"github.com/CaninoDev/gastro/server/internal/logger"
-	"github.com/CaninoDev/gastro/server/internal/model"
-
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/CaninoDev/gastro/server/internal/authentication"
+
+	"github.com/CaninoDev/gastro/server/api"
+	"github.com/CaninoDev/gastro/server/api/account"
+	authentication2 "github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 
 type accountHandler struct {
-	authSvc authentication.Service
+	authSvc authentication2.Service
 	svc     account.Service
 }
 
 // NewAccountRoutes sets up menu API endpoint using Gin has the router.
-func NewAccountRoutes(svc account.Service, authSvc authentication.Service, r *gin.Engine) {
+func NewAccountRoutes(svc account.Service, authSvc authentication2.Service, r *gin.Engine) {
 	h := accountHandler{authSvc, svc}
 
 	// public routes
@@ -90,7 +89,7 @@ func (h *accountHandler) list(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	if role == model.Admin {
+	if role == api.Admin {
 		accounts, err := h.svc.List(ctx)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)

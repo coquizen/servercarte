@@ -5,36 +5,37 @@ import (
 	"errors"
 	"time"
 
+	"github.com/CaninoDev/gastro/server/api"
+	authentication2 "github.com/CaninoDev/gastro/server/api/authentication"
+	security2 "github.com/CaninoDev/gastro/server/api/security"
 	"github.com/CaninoDev/gastro/server/api/user"
 
 	"github.com/google/uuid"
 
 	"github.com/CaninoDev/gastro/server/internal/authentication"
-	"github.com/CaninoDev/gastro/server/internal/model"
-	"github.com/CaninoDev/gastro/server/internal/security"
 )
 // Account are the contracted methods to interact with GORM
 type Account struct {
 	accountRepo Repository
 	userRepo    user.Repository
-	secSvc      security.Service
-	authSvc     authentication.Service
+	secSvc      security2.Service
+	authSvc     authentication2.Service
 }
 
-func Bind(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
-	authSvc authentication.Service) *Account {
+func Bind(accountRepo Repository, userRepo user.Repository, secSvc security2.Service,
+	authSvc authentication2.Service) *Account {
 	return &Account{
 		accountRepo,userRepo, secSvc, authSvc,
 	}
 }
 
-func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
-	authSvc authentication.Service) *Account {
+func Initialize(accountRepo Repository, userRepo user.Repository, secSvc security2.Service,
+	authSvc authentication2.Service) *Account {
 	return Bind(accountRepo, userRepo, secSvc, authSvc)
 }
 
 func (a *Account) New(ctx context.Context, req NewAccountRequest) error {
-	var newUser model.User
+	var newUser api.User
 	newUser.FirstName = req.FirstName
 	newUser.LastName = req.LastName
 	newUser.Address1 = req.Address1
@@ -53,7 +54,7 @@ func (a *Account) New(ctx context.Context, req NewAccountRequest) error {
 		return err
 	}
 
-	var newAccount model.Account
+	var newAccount api.Account
 	newAccount.Username = req.Username
 	if err := a.accountRepo.Find(ctx, &newAccount); err == nil {
 		return errors.New("username already exists")
@@ -76,7 +77,7 @@ func (a *Account) New(ctx context.Context, req NewAccountRequest) error {
 }
 
 func (a *Account) Authenticate(ctx context.Context, username, password string) (string, error) {
-	var acct model.Account
+	var acct api.Account
 	acct.Username = username
 
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
@@ -100,26 +101,26 @@ func (a *Account) Authenticate(ctx context.Context, username, password string) (
 	return token, nil
 }
 
-func (a *Account) FindByUsername(ctx context.Context, username string) (*model.Account, error) {
-	var acct model.Account
+func (a *Account) FindByUsername(ctx context.Context, username string) (*api.Account, error) {
+	var acct api.Account
 	acct.Username = username
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
-		return &model.Account{}, err
+		return &api.Account{}, err
 	}
 	return &acct, nil
 }
 
-func (a *Account) FindByToken(ctx context.Context, token string) (*model.Account, error) {
-	var acct model.Account
+func (a *Account) FindByToken(ctx context.Context, token string) (*api.Account, error) {
+	var acct api.Account
 	acct.Token = token
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
-		return &model.Account{}, err
+		return &api.Account{}, err
 	}
 	return &acct, nil
 }
 
 func (a *Account) ChangePassword(ctx context.Context, username, oldPassword, newPassword, confirmNewPassword string) error {
-	var acct model.Account
+	var acct api.Account
 	acct.Username = username
 	if newPassword != confirmNewPassword {
 		return errors.New("passwords don't match")
@@ -142,7 +143,7 @@ func (a *Account) ChangePassword(ctx context.Context, username, oldPassword, new
 
 // Delete will delete the intended account
 func (a *Account) Delete(ctx context.Context, id uuid.UUID, passWord string) error {
-	var acct model.Account
+	var acct api.Account
 	acct.ID = id
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
 		return err
@@ -159,8 +160,8 @@ func (a *Account) Delete(ctx context.Context, id uuid.UUID, passWord string) err
 }
 
 func (a *Account) RefreshAuthorization(ctx context.Context) error {
-	claims := ctx.Value(authentication.AUTH_PROPS).(authentication.CustomClaims)
-	var acct model.Account
+	claims := ctx.Value(authentication.AUTH_PROPS).(authentication2.CustomClaims)
+	var acct api.Account
 	acct.Username = claims.Username
 	if err := a.accountRepo.Find(ctx, &acct); err != nil {
 		return err
@@ -177,8 +178,8 @@ func (a *Account) RefreshAuthorization(ctx context.Context) error {
 	return errors.New("unauthorized; please re-login")
 }
 
-func (a *Account) List(ctx context.Context) (*[]model.Account, error) {
-	var accounts []model.Account
+func (a *Account) List(ctx context.Context) (*[]api.Account, error) {
+	var accounts []api.Account
 	if err := a.accountRepo.All(ctx, &accounts); err != nil {
 		return &accounts, err
 	}
@@ -186,7 +187,7 @@ func (a *Account) List(ctx context.Context) (*[]model.Account, error) {
 }
 
 func (a *Account) Update(ctx context.Context, request UpdateAccountRequest) error {
-	var account model.Account
+	var account api.Account
 	account.ID = request.ID
 	if err := a.accountRepo.Find(ctx, &account); err != nil {
 		return err
@@ -194,7 +195,7 @@ func (a *Account) Update(ctx context.Context, request UpdateAccountRequest) erro
 	if err := a.accountRepo.Update(ctx, &account); err != nil {
 		return err
 	}
-	var updateUser model.User
+	var updateUser api.User
 	updateUser.ID = account.UserID
 	if err := a.userRepo.View(ctx, &updateUser); err != nil {
 		return err

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/model"
+	"github.com/CaninoDev/gastro/server/api"
 )
 
 // NewAccountRequest represent the request struct for Create endpoint
@@ -35,10 +35,10 @@ type UpdateAccountRequest struct {
 type Service interface {
 	New(ctx context.Context, newAccountDetails NewAccountRequest) error
 	Authenticate(ctx context.Context, username string, password string) (string, error)
-	List(ctx context.Context) (*[]model.Account, error)
+	List(ctx context.Context) (*[]api.Account, error)
 	Update(ctx context.Context, request UpdateAccountRequest) error
-	FindByUsername(ctx context.Context, username string) (*model.Account, error)
-	FindByToken(ctx context.Context, token string) (*model.Account, error)
+	FindByUsername(ctx context.Context, username string) (*api.Account, error)
+	FindByToken(ctx context.Context, token string) (*api.Account, error)
 	Delete(ctx context.Context, accountID uuid.UUID, password string) error
 }
 

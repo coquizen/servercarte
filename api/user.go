@@ -1,4 +1,4 @@
-package model
+package api
 
 // User struct represent the user that will have admin access.
 type User struct {

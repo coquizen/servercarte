@@ -1,4 +1,4 @@
-package model
+package api
 
 import (
 	"github.com/google/uuid"
@@ -13,10 +13,10 @@ type Section struct {
 	Visible         bool       `json:"visible" gorm:"default:true"`
 	ListOrder       uint      `json:"list_order" gorm:"default:0"`
 	SectionID       *uuid.UUID  `json:"section_id,omitempty,"`
-	SubSections     []Section  `json:"subsections" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,
+	SubSections     []Section `json:"subsections" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,
 OnDelete:SET NULL;"`
-	Items           []Item     `json:"items" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,
+	Items           []Item `json:"items" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,
 OnDelete:SET NULL"`
-	AddOns          []Item     `json:"add_ons,
+	AddOns          []Item `json:"add_ons,
 omitempty" gorm:"foreignKey:AddOnsID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }

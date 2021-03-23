@@ -1,13 +1,13 @@
 package ginHTTP
 
 import (
-	"github.com/CaninoDev/gastro/server/api/user"
 	"net/http"
+
+	"github.com/CaninoDev/gastro/server/api"
+	"github.com/CaninoDev/gastro/server/api/user"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"github.com/CaninoDev/gastro/server/internal/model"
 )
 
 type userHandler struct {
@@ -59,7 +59,7 @@ func (h userHandler) update(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	updateUser := &model.User{
+	updateUser := &api.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Address1:  req.Address1,
