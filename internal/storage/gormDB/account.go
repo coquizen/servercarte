@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/CaninoDev/gastro/server/internal/model"
 )
@@ -19,13 +20,16 @@ func NewAccountRepository(db *gorm.DB) *AccountRepository {
 }
 
 func (a *AccountRepository) All(ctx context.Context, accounts *[]model.Account) error {
-	return a.db.Find(&accounts).Error
+	return a.db.Preload(clause.Associations).Find(&accounts).Error
 }
 func (a *AccountRepository) Create(ctx context.Context, account *model.Account) error {
 	return a.db.Create(&account).Error
 }
 
 func (a *AccountRepository) Find(ctx context.Context, account *model.Account) error {
+	if account.Username != "" {
+		return a.db.First(&account, "username = ?", account.Username).Error
+	}
 	return a.db.First(&account).Error
 }
 

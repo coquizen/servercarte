@@ -7,8 +7,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-
-	"github.com/CaninoDev/gastro/server/internal/authentication"
 )
 
 
@@ -18,32 +16,30 @@ func (a *JWT) Middleware() gin.HandlerFunc {
 			token, err := a.parseToken(ctx.Request)
 			if err != nil {
 				ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("No authorization header provided: %v", err))
-			}
 
-			if isTokenExpired(*token) == true {
+			} else if isTokenExpired(token) == true {
 				ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Token has expired: %v", err))
-			}
-			if token.Valid {
+
+			} else if token.Valid {
 				provisionClaimsToContext(ctx, token)
-				ctx.Next()
+
+			} else {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
 			}
-			ctx.AbortWithStatus(http.StatusInternalServerError)
 			ctx.Next()
 		}
 }
 
 func provisionClaimsToContext(ctx *gin.Context, token *jwt.Token) {
-	ctxClaims := token.Claims.(jwtWrappedClaims).CustomClaims
-	ctx.Set(authentication.AUTH_PROPS, ctxClaims)
+	ctxClaims := token.Claims.(*jwtWrappedClaims)
+	ctx.Set("role", ctxClaims.Role)
+	ctx.Set("accountID", ctxClaims.AccountID)
+	ctx.Set("username", ctxClaims.Username)
 }
 
-func isTokenExpired(token jwt.Token) bool {
-	claims := token.Claims.(jwtWrappedClaims)
-
-	exp, err := time.Parse(time.RFC3339, string(claims.Expiry))
-	if err != nil {
-		return true
-	}
+func isTokenExpired(token *jwt.Token) bool {
+	claims := token.Claims.(*jwtWrappedClaims)
+	exp := time.Unix(claims.Expiry,0 ).UTC()
 	currTime := time.Now().UTC()
 	if currTime.After(exp) == true {
 		return true

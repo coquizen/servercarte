@@ -92,17 +92,15 @@ func SeedDatabase(db *gorm.DB) error {
 		Email:     "admin@Gusteaus.com",
 	}
 	db.Create(&adminUser)
-	password := "admin"
+	password := "administrator"
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	adminAccount := model.Account{
-		Username:    "admin",
-		Password:    string(hashedPassword),
-		Role:        model.Admin,
+	adminAccount := &model.Account{
+		Username: "admin",
+		Password: string(hashedPassword),
+		Role:     model.Admin,
 	}
 	db.Create(&adminAccount)
-	if err := db.Model(&adminAccount).Association("User").Append(&adminUser); err != nil {
-		return err
-	}
+
 	logger.Info.Println("Successful")
 	logger.Info.Println("Creating employee account/user...")
 	employeeUser := model.User{
@@ -114,17 +112,19 @@ func SeedDatabase(db *gorm.DB) error {
 		Email:     "remy@pixar.com",
 	}
 	db.Create(&employeeUser)
+
 	password = "employee"
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	employeeAccount := model.Account{
-		Username:    "employee",
-		Password:    string(hashedPassword),
-		Role:        model.Employee,
+	employeeAccount := &model.Account{
+		Username: "employee",
+		Password: string(hashedPassword),
+		Role:     model.Employee,
+
+
 	}
 	db.Create(&employeeAccount)
-	if err := db.Model(&employeeAccount).Association("User").Append(&employeeUser); err != nil {
-		return err
-	}
+
+
 	logger.Info.Println("Successful")
 	logger.Info.Println("Creating guest account/user...")
 	guestUser := model.User{
@@ -137,18 +137,44 @@ func SeedDatabase(db *gorm.DB) error {
 	}
 
 	db.Create(&guestUser)
+
 	password = "guest"
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	guestAccount := model.Account{
-		Username:    "guest",
-		Password:    string(hashedPassword),
-		Role:        model.Guest,
+	guestAccount := &model.Account{
+		Username: "guest",
+		Password: string(hashedPassword),
+		Role:     model.Guest,
 	}
 
 	db.Create(&guestAccount)
-	if err := db.Model(&guestAccount).Association("User").Append(&guestUser); err != nil {
+
+	guestAccount.User = guestUser
+	adminAccount.User = adminUser
+	employeeAccount.User = employeeUser
+
+	if err := db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Save(&guestAccount).Error; err != nil {
 		return err
 	}
+	if err := db.Session(&gorm.Session{FullSaveAssociations: true,
+		AllowGlobalUpdate: true}).Save(&adminAccount).Error; err != nil {
+		return err
+	}
+	if err := db.Session(&gorm.Session{FullSaveAssociations: true,
+		AllowGlobalUpdate: true}).Save(&employeeAccount).Error; err != nil {
+		return err
+	}
+	//
+	// // if db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Model(&guestAccount).Association("User").Append(&guestUser); err != nil {
+	// // 	return err
+	// // }
+	// if db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Model(&employeeAccount).Association("User").Append(&employeeUser); err != nil {
+	// 	return err
+	// }
+	//
+	//
+	// if db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Model(&adminAccount).Association("User").Append(&adminUser); err != nil {
+	// 	return err
+	// }
 
 	logger.Info.Println("Successful")
 

@@ -24,7 +24,6 @@ type Account struct {
 	Password    string      `json:"password" gorm:"not null"`
 	Role        AccessLevel `json:"role" gorm:"not null"`
 	Token       string      `json:"token,omitempty" gorm:"null"`
-	TokenExpiry time.Time   `json:"token_expiry,omitempty" gorm:"null"`
 	LastLogin   time.Time   `json:"last_login,omitempty" gorm:"null"`
 }
 

@@ -30,6 +30,10 @@ type Settings struct {
 	SecretKey        string
 }
 
+type Token struct {
+	Token string
+	TokenExpiry int64
+}
 type jwtWrappedClaims struct {
 	jwt.StandardClaims
 	authentication.CustomClaims
@@ -137,7 +141,7 @@ func (a *JWT) TokenValid(req *http.Request) error {
 // parseToken reads the header string and parses the token as encoded by GenerateToken
 func (a *JWT) parseToken(req *http.Request) (*jwt.Token, error) {
 	tokenString := a.ExtractToken(req)
-	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	return jwt.ParseWithClaims(tokenString, &jwtWrappedClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if a.algorithm != token.Method {
 			return nil, errors.New("could not decode token; please re-authenticate")
 		}
@@ -146,9 +150,9 @@ func (a *JWT) parseToken(req *http.Request) (*jwt.Token, error) {
 }
 // ExtractToken extracts the token string from the request header
 func (a *JWT) ExtractToken(req *http.Request) string {
-	authorizatioHeader := req.Header.Get("Authorization")
-	if authorizatioHeader != "" {
-		bearerToken := strings.Split(authorizatioHeader, " ")
+	authorizationHeader := req.Header.Get("Authorization")
+	if authorizationHeader != "" {
+		bearerToken := strings.Split(authorizationHeader, " ")
 		if len(bearerToken) == 2 {
 			return bearerToken[1]
 		}

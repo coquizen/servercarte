@@ -2,8 +2,13 @@ package ginHTTP
 
 import (
 	"fmt"
+
+	"github.com/google/uuid"
+
 	"github.com/CaninoDev/gastro/server/api/account"
 	"github.com/CaninoDev/gastro/server/internal/logger"
+	"github.com/CaninoDev/gastro/server/internal/model"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -64,20 +69,37 @@ func (h *accountHandler) login(ctx *gin.Context) {
 		return
 	}
 
+	// loginAcct, err := h.svc.FindByUsername(ctx, cred.Username)
+	// if err != nil {
+	// 	ctx.AbortWithError(http.StatusBadRequest, err)
+	// 	return
+	// }
 	authenticationToken, err := h.svc.Authenticate(ctx, cred.Username, cred.Password)
 	if err != nil {
 		ctx.AbortWithError(http.StatusUnauthorized, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, authenticationToken)
 }
 
 func (h *accountHandler) list(ctx *gin.Context) {
-	accounts, err := h.svc.List(ctx)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError)
+	role, exists := ctx.Get("role")
+	logger.Info.Println(role)
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
-	ctx.JSON(http.StatusOK, accounts)
+	if role == model.Admin {
+		accounts, err := h.svc.List(ctx)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"data": accounts})
+		return
+	}
+	ctx.AbortWithStatus(http.StatusUnauthorized)
 }
 
 func (h *accountHandler) update(ctx *gin.Context) {
@@ -86,16 +108,13 @@ func (h *accountHandler) update(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, "invalid json")
 		return
 	}
-	if err := h.authSvc.TokenValid(ctx.Request); err != nil {
+	accountID, exists := ctx.Get("accountID")
+	if !exists {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
-	claims, err := h.authSvc.ExtractTokenClaims(ctx.Request)
-	if err != nil {
-		ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("unable to extract token: %v", err))
-	}
-	updateAccount.ID = claims.AccountID
-
-	if err := h.svc.Update(ctx, claims.AccountID, updateAccount); err != nil {
+	updateAccount.ID = accountID.(uuid.UUID)
+	if err := h.svc.Update(ctx, updateAccount); err != nil {
 		if err := ctx.AbortWithError(http.StatusBadRequest, err).Error; err != nil {
 			return
 		}

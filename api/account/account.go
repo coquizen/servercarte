@@ -3,8 +3,9 @@ package account
 import (
 	"context"
 	"errors"
-	"github.com/CaninoDev/gastro/server/api/user"
 	"time"
+
+	"github.com/CaninoDev/gastro/server/api/user"
 
 	"github.com/google/uuid"
 
@@ -93,7 +94,6 @@ func (a *Account) Authenticate(ctx context.Context, username, password string) (
 
 	acct.LastLogin = time.Now()
 	acct.Token = token
-
 	if err := a.accountRepo.Update(ctx, &acct); err != nil {
 		return "", err
 	}
@@ -185,9 +185,9 @@ func (a *Account) List(ctx context.Context) (*[]model.Account, error) {
 	return &accounts, nil
 }
 
-func (a *Account) Update(ctx context.Context, id uuid.UUID, request UpdateAccountRequest) error {
+func (a *Account) Update(ctx context.Context, request UpdateAccountRequest) error {
 	var account model.Account
-	account.ID = id
+	account.ID = request.ID
 	if err := a.accountRepo.Find(ctx, &account); err != nil {
 		return err
 	}
@@ -200,7 +200,9 @@ func (a *Account) Update(ctx context.Context, id uuid.UUID, request UpdateAccoun
 		return err
 	}
 	updateUser.Address1 = request.Address1
-	updateUser.Address2 = *request.Address2
+	if request.Address2 != nil {
+		updateUser.Address2 = *request.Address2
+	}
 	updateUser.ZipCode = request.ZipCode
 	updateUser.Email = request.Email
 	if err := a.userRepo.Update(ctx, &updateUser); err != nil {

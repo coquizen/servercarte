@@ -62,6 +62,11 @@ func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 
 // createSection creates a new section.
 func (h *menuHandler) createSection(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists || role != model.Admin {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
 	var section model.Section
 
@@ -81,6 +86,11 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 
 // updateSection update section's data.
 func (h *menuHandler) updateSection(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists || role != model.Admin {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	var section model.Section
 
 	if err := ctx.ShouldBindJSON(&section); err != nil {
@@ -105,6 +115,11 @@ func (h *menuHandler) updateSection(ctx *gin.Context) {
 }
 
 func (h *menuHandler) deleteSection(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists || role != model.Admin {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	rawID := ctx.Param("id")
 	if err := h.svc.DeleteSection(ctx, rawID); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
@@ -129,6 +144,11 @@ func (h *menuHandler) listItems(ctx *gin.Context) {
 
 // createSection creates a new section.
 func (h *menuHandler) createItem(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists || role != model.Admin {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	var item model.Item
 
 	if err := ctx.ShouldBindJSON(&item); err != nil {
@@ -146,6 +166,11 @@ func (h *menuHandler) createItem(ctx *gin.Context) {
 
 // updateSection creates a new section.
 func (h *menuHandler) updateItem(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists || role != model.Admin {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	rawID := ctx.Param("id")
 	id, err := uuid.Parse(rawID)
 	if err != nil {
@@ -179,6 +204,11 @@ func (h *menuHandler) findItemByID(ctx *gin.Context) {
 }
 
 func (h *menuHandler) deleteItem(ctx *gin.Context) {
+	role, exists := ctx.Get("role")
+	if !exists || role != model.Admin {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	rawID := ctx.Param("id")
 
 	if err := h.svc.DeleteItem(ctx, rawID); err != nil {
