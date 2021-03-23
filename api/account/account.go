@@ -6,14 +6,13 @@ import (
 	"time"
 
 	"github.com/CaninoDev/gastro/server/api"
-    "github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/api/authentication"
 	"github.com/CaninoDev/gastro/server/api/security"
 	"github.com/CaninoDev/gastro/server/api/user"
 
 	"github.com/google/uuid"
-
-
 )
+
 // Account are the contracted methods to interact with GORM
 type Account struct {
 	accountRepo Repository
@@ -25,7 +24,7 @@ type Account struct {
 func Bind(accountRepo Repository, userRepo user.Repository, secSvc security.Service,
 	authSvc authentication.Service) *Account {
 	return &Account{
-		accountRepo,userRepo, secSvc, authSvc,
+		accountRepo, userRepo, secSvc, authSvc,
 	}
 }
 
@@ -46,7 +45,7 @@ func (a *Account) New(ctx context.Context, req NewAccountRequest) error {
 		return errors.New("account already exists")
 	}
 
-	if a.secSvc.ConfirmationChecker(ctx, req.Password, req.PasswordConfirm) == false {
+	if !a.secSvc.ConfirmationChecker(ctx, req.Password, req.PasswordConfirm) {
 		return errors.New("passwords don't match")
 	}
 
@@ -59,8 +58,6 @@ func (a *Account) New(ctx context.Context, req NewAccountRequest) error {
 	if err := a.accountRepo.Find(ctx, &newAccount); err == nil {
 		return errors.New("username already exists")
 	}
-
-
 
 	newAccount.Password = a.secSvc.Hash(ctx, req.Password)
 
@@ -149,7 +146,7 @@ func (a *Account) Delete(ctx context.Context, id uuid.UUID, passWord string) err
 		return err
 	}
 
-	if ! a.secSvc.VerifyPasswordMatches(ctx, acct.Password, passWord) {
+	if !a.secSvc.VerifyPasswordMatches(ctx, acct.Password, passWord) {
 		return errors.New("password incorrect")
 	}
 

@@ -12,4 +12,5 @@ require (
 	gorm.io/driver/postgres v1.0.6
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.20.11
+	honnef.co/go/tools v0.1.3 // indirect
 )

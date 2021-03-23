@@ -52,7 +52,7 @@ func (s BCrypt) Hash(_ context.Context, password string) string {
 func (s BCrypt) IsValid(_ context.Context, password string) error {
 	// TODO: add conditional to check if password has been used previously.
 	if s.Settings.Length > len(password) {
-		return errors.New(fmt.Sprintf("password too short; should have %d characters", s.Settings.Length))
+		return fmt.Errorf("password too short; should have %d characters", s.Settings.Length)
 	}
 
 	if s.Settings.MixedCase && !helpers.HasMixedCase(password) {

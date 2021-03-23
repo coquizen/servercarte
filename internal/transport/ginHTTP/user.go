@@ -38,13 +38,12 @@ func (h *userHandler) view(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": userInformation})
-	return
 }
 
 type updateReq struct {
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`
-	Address1   string `json:"address_1"`
+	Address1  string `json:"address_1"`
 	Address2  string `json:"address_2"`
 	ZipCode   uint   `json:"zip_code"`
 }
@@ -63,7 +62,7 @@ func (h userHandler) update(ctx *gin.Context) {
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Address1:  req.Address1,
-		Address2: req.Address2,
+		Address2:  req.Address2,
 		ZipCode:   req.ZipCode,
 	}
 	updateUser.ID = parsedID

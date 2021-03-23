@@ -18,7 +18,7 @@ type menuHandler struct {
 }
 
 // NewMenuRoutes sets up menu API endpoint using Gin has the router.
-func NewMenuRoutes(svc menu.Service, authSvc authentication2.Service, r *gin.Engine, ) {
+func NewMenuRoutes(svc menu.Service, authSvc authentication2.Service, r *gin.Engine) {
 	h := menuHandler{svc, authSvc}
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
@@ -27,7 +27,7 @@ func NewMenuRoutes(svc menu.Service, authSvc authentication2.Service, r *gin.Eng
 	menuViewGroup.GET("/items", h.listItems)
 	menuViewGroup.GET("/items/:id", h.findItemByID)
 
-	menuEditGroup := menuGroup.Group("", )
+	menuEditGroup := menuGroup.Group("")
 	menuEditGroup.POST("/sections", h.createSection)
 	menuEditGroup.PATCH("/sections/:id", h.updateSection)
 	menuEditGroup.DELETE("/sections/:id", h.deleteSection)
@@ -45,7 +45,6 @@ func (h *menuHandler) listSections(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": sections})
-	return
 }
 
 func (h *menuHandler) findSectionByID(ctx *gin.Context) {
@@ -57,7 +56,6 @@ func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": section})
-	return
 }
 
 // createSection creates a new section.
@@ -82,7 +80,6 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"data": section})
 }
-
 
 // updateSection update section's data.
 func (h *menuHandler) updateSection(ctx *gin.Context) {
@@ -126,9 +123,7 @@ func (h *menuHandler) deleteSection(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "section deleted"})
-	return
 }
-
 
 // ---  Item  --- //
 func (h *menuHandler) listItems(ctx *gin.Context) {
@@ -139,7 +134,6 @@ func (h *menuHandler) listItems(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": items})
-	return
 }
 
 // createSection creates a new section.
@@ -200,7 +194,6 @@ func (h *menuHandler) findItemByID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": item})
-	return
 }
 
 func (h *menuHandler) deleteItem(ctx *gin.Context) {
@@ -216,5 +209,4 @@ func (h *menuHandler) deleteItem(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "item deleted"})
-	return
 }

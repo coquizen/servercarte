@@ -2,11 +2,12 @@ package gormDB
 
 import (
 	"fmt"
-	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"gorm.io/gorm/logger"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -18,10 +19,7 @@ import (
 
 // Start returns a configured instance of database{}
 func Start(cfg *config.Database, populateDatabase bool) (*gorm.DB, error) {
-	var gormCfg *gorm.Config
-
-	// Set up some universal settings for gorm
-	gormCfg = &gorm.Config{
+	var gormCfg = &gorm.Config{
 		Logger: newLogger(),
 		NowFunc: func() time.Time {
 			return time.Now().UTC()

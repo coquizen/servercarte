@@ -9,25 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
 func (a *JWT) Middleware() gin.HandlerFunc {
-		return func(ctx *gin.Context) {
-			token, err := a.parseToken(ctx.Request)
-			if err != nil {
-				ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("No authorization header provided: %v", err))
+	return func(ctx *gin.Context) {
+		token, err := a.parseToken(ctx.Request)
+		if err != nil {
+			ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("no authorization header provided: %v", err))
 
-			} else if isTokenExpired(token) == true {
-				ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Token has expired: %v", err))
+		} else if isTokenExpired(token) {
+			ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token has expired: %v", err))
 
-			} else if token.Valid {
-				provisionClaimsToContext(ctx, token)
+		} else if token.Valid {
+			provisionClaimsToContext(ctx, token)
 
-			} else {
-				ctx.AbortWithStatus(http.StatusInternalServerError)
-			}
-			ctx.Next()
+		} else {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
 		}
+		ctx.Next()
+	}
 }
 
 func provisionClaimsToContext(ctx *gin.Context, token *jwt.Token) {
@@ -39,10 +37,7 @@ func provisionClaimsToContext(ctx *gin.Context, token *jwt.Token) {
 
 func isTokenExpired(token *jwt.Token) bool {
 	claims := token.Claims.(*jwtWrappedClaims)
-	exp := time.Unix(claims.Expiry,0 ).UTC()
+	exp := time.Unix(claims.Expiry, 0).UTC()
 	currTime := time.Now().UTC()
-	if currTime.After(exp) == true {
-		return true
-	}
-	return false
+	return currTime.After(exp)
 }

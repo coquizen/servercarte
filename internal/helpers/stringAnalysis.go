@@ -14,10 +14,10 @@ func HasMixedCase(str string) bool {
 	hasUpper = false
 	for _, character := range str {
 		if unicode.IsLetter(character) {
-			if hasLower == false {
+			if !hasLower {
 				hasLower = unicode.IsLower(character)
 			}
-			if hasUpper == false {
+			if !hasUpper {
 				hasUpper = unicode.IsUpper(character)
 			}
 		}
@@ -33,7 +33,9 @@ func HasSpecialChar(str string) bool {
 	var specialChar = "!@#$%^&*"
 	for _, character := range str {
 		for _, spcCharacter := range specialChar {
-			if character == spcCharacter { return true}
+			if character == spcCharacter {
+				return true
+			}
 		}
 	}
 	return false
@@ -52,7 +54,7 @@ func HasAlphaNum(str string) bool {
 		if unicode.IsNumber(character) {
 			hasNumber = true
 		}
-		if (hasAlpha && hasNumber) {
+		if hasAlpha && hasNumber {
 			return true
 		}
 	}
