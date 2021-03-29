@@ -13,8 +13,8 @@ type userHandler struct {
 	svc user.Service
 }
 
-// NewUserRoutes setups the api endpoint for the user
-func NewUserRoutes(svc user.Service, r *gin.Engine) {
+// RegisterRoutes setups the api endpoint for the user
+func RegisterRoutes(svc user.Service, r *gin.Engine) {
 	h := userHandler{svc}
 	userGroup := r.Group("/user")
 	userGroup.GET("/:id", h.view)
@@ -42,7 +42,7 @@ func (h *userHandler) view(ctx *gin.Context) {
 type updateReq struct {
 	FirstName string `json:"first_name,omitempty"`
 	LastName  string `json:"last_name,omitempty"`
-	Address1  string `json:"address_1"`
+	Address1   string `json:"address_1"`
 	Address2  string `json:"address_2"`
 	ZipCode   uint   `json:"zip_code"`
 }
@@ -61,7 +61,7 @@ func (h userHandler) update(ctx *gin.Context) {
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Address1:  req.Address1,
-		Address2:  req.Address2,
+		Address2: req.Address2,
 		ZipCode:   req.ZipCode,
 	}
 	updateUser.ID = parsedID

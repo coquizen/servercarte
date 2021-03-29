@@ -10,3 +10,12 @@ type Service interface {
 	Hash(ctx context.Context, password string) string
 	IsValid(ctx context.Context, password string) error
 }
+
+type Security struct {
+	Service
+}
+
+func NewService(secSvc Service) *Security {
+	return &Security{secSvc}
+}
+

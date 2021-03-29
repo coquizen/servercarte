@@ -1,126 +1,36 @@
 package menu
 
 import (
-	"context"
-
 	"github.com/google/uuid"
 
 	"github.com/CaninoDev/gastro/server/api"
 )
 
-type Menu struct {
-	repo Repository
+// Section struct defines the service structure.
+type Section struct {
+	api.Base
+	Title           string     `json:"title" gorm:"unique,not null"`
+	Description     *string    `json:"description,omitempty"`
+	Active          bool       `json:"active" gorm:"default:true"`
+	Visible         bool       `json:"visible" gorm:"default:true"`
+	ListOrder       uint      `json:"list_order" gorm:"default:0"`
+	SectionID       *uuid.UUID  `json:"section_id,omitempty,"`
+	SubSections     []Section   `json:"subsections" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Items           []Item `json:"items" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	AddOns          []Item `json:"add_ons,omitempty" gorm:"foreignKey:AddOnsID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
-// New instantiates a new application interface
-func Bind(repo Repository) *Menu {
-	return &Menu{repo: repo}
+// Item struct defines service items.
+type Item struct {
+	api.Base
+	Title       string    `json:"title" gorm:"not null"`
+	Description *string   `json:"description"`
+	Price       uint64    `json:"price"`
+	Active      bool      `json:"active" gorm:"default:true"`
+	Type        uint      `json:"type,omitempty" gorm:"default:1"`
+	ListOrder   uint      `json:"list_order" gorm:"default:0"`
+	SectionID   *uuid.UUID `json:"section_id"`
+	AddOnsID    *uuid.UUID
+
 }
-
-func Initialize(repo Repository) *Menu {
-	return Bind(repo)
-}
-
-
-func (m Menu) Sections(ctx context.Context) (*[]api.Section, error) {
-	return m.repo.ListSections(ctx)
-}
-
-func (m Menu) SectionByID(ctx context.Context, rawID string) (*api.Section, error) {
- 	id, err := uuid.Parse(rawID)
-	if err != nil {
-		return &api.Section{}, err
-	}
-	var section api.Section
-	section.ID = id
-	if err := m.repo.FindSection(ctx, &section); err != nil {
-		return &section, err
-	}
-	return &section, nil
-}
-
-func (m Menu) NewSection(ctx context.Context, section *api.Section) error {
-	return m.repo.CreateSection(ctx, section)
-}
-
-func (m Menu) UpdateSectionData(ctx context.Context, section *api.Section) error {
-	return m.repo.UpdateSection(ctx, section)
-}
-
-func (m Menu) ReParentSection(ctx context.Context, section *api.Section, newParentID uuid.UUID) error {
-	var newParentSection api.Section
-	newParentSection.ID = newParentID
-	if err := m.repo.FindSection(ctx, &newParentSection); err != nil {
-		return err
-	}
-
-	return m.repo.UpdateSectionParent(ctx, section, &newParentSection)
-}
-
-func (m Menu) DeleteSection(ctx context.Context, rawID string) error {
-	newSectionParentID, err := uuid.Parse(rawID)
-	if err != nil {
-		return err
-	}
-	var newParentSection api.Section
-	newParentSection.ID = newSectionParentID
-	if err := m.repo.FindSection(ctx, &newParentSection); err != nil {
-		return err
-	}
-	return m.repo.DeleteSection(ctx, &newParentSection)
-}
-
-func (m Menu) Items(ctx context.Context) (*[]api.Item, error) {
-	return m.repo.ListItems(ctx)
-}
-
-func (m Menu) ItemByID(ctx context.Context, rawID string) (*api.Item, error) {
-	id, err := uuid.Parse(rawID)
-	if err != nil {
-		return &api.Item{}, err
-	}
-	var item api.Item
-	item.ID = id
-	if err := m.repo.FindItem(ctx, &item); err != nil {
-		return &item, err
-	}
-
-	return &item, nil
-}
-
-func (m Menu) ReParentItem(ctx context.Context, item *api.Item, newSectionParentID uuid.UUID) error {
-	var newParentSection api.Section
-	newParentSection.ID = newSectionParentID
-	if err := m.repo.FindSection(ctx, &newParentSection); err != nil {
-		return err
-	}
-
-	return m.repo.UpdateItemParent(ctx, item, &newParentSection)
-}
-
-func (m Menu) NewItem(ctx context.Context, item *api.Item) error {
-	return m.repo.CreateItem(ctx, item)
-}
-
-func (m Menu) UpdateItemData(ctx context.Context, item *api.Item) error {
-	return m.repo.UpdateItem(ctx, item)
-}
-
-func (m Menu) DeleteItem(ctx context.Context, rawID string) error {
-	id, err := uuid.Parse(rawID)
-	if err != nil {
-		return err
-	}
-
-	var item api.Item
-	item.ID = id
-	if err := m.repo.FindItem(ctx, &item); err != nil {
-		return err
-	}
-	return m.repo.DeleteItem(ctx, &item)
-}
-
-
-
-
 

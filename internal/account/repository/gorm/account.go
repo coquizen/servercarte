@@ -1,15 +1,14 @@
-package gormDB
+package gorm
 
 import (
 	"context"
+	"github.com/CaninoDev/gastro/server/api/account"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-
-	"github.com/CaninoDev/gastro/server/api"
 )
 
-// AccountRepository represents the client to its persistent storage
+// AccountRepository represents the client to its persistent repository
 type AccountRepository struct {
 	db *gorm.DB
 }
@@ -19,25 +18,25 @@ func NewAccountRepository(db *gorm.DB) *AccountRepository {
 	return &AccountRepository{db}
 }
 
-func (a *AccountRepository) All(ctx context.Context, accounts *[]api.Account) error {
+func (a *AccountRepository) List(ctx context.Context, accounts *[]account.Account) error {
 	return a.db.Preload(clause.Associations).Find(&accounts).Error
 }
-func (a *AccountRepository) Create(ctx context.Context, account *api.Account) error {
+func (a *AccountRepository) Create(ctx context.Context, account *account.Account) error {
 	return a.db.Create(&account).Error
 }
 
-func (a *AccountRepository) Find(ctx context.Context, account *api.Account) error {
+func (a *AccountRepository) Find(ctx context.Context, account *account.Account) error {
 	if account.Username != "" {
 		return a.db.First(&account, "username = ?", account.Username).Error
 	}
 	return a.db.First(&account).Error
 }
 
-func (a *AccountRepository) Update(ctx context.Context, account *api.Account) error {
+func (a *AccountRepository) Update(ctx context.Context, account *account.Account) error {
 	return a.db.Save(&account).Error
 }
 
-func (a *AccountRepository) Delete(ctx context.Context, account *api.Account) error {
+func (a *AccountRepository) Delete(ctx context.Context, account *account.Account) error {
 	return a.db.Delete(&account).Error
 }
 

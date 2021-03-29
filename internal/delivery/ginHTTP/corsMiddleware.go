@@ -1,9 +1,10 @@
-package middlewares
+package ginHTTP
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
+// CORSMiddleware sets up the parameters under which cross-origin-requests are permitted
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")

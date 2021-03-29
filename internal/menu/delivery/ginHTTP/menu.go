@@ -6,6 +6,7 @@ import (
 
 	"github.com/CaninoDev/gastro/server/api/account"
 	"github.com/CaninoDev/gastro/server/api/authentication"
+
 	"github.com/CaninoDev/gastro/server/api/menu"
 
 	"github.com/gin-gonic/gin"
@@ -13,21 +14,28 @@ import (
 )
 
 type menuHandler struct {
-	svc     menu.Service
+	menuSvc menu.Service
 	authSvc authentication.Service
 }
 
-// NewMenuRoutes sets up menu API endpoint using Gin has the router.
-func NewMenuRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engine) {
+// RegisterRoutes sets up menu API endpoint using Gin has the delivery.
+func RegisterRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engine, authMiddleWare gin.HandlerFunc) {
 	h := menuHandler{svc, authSvc}
+	publicRoutes(r, &h)
+	privateRoutes(r, &h, authMiddleWare)
+}
+
+func publicRoutes(r *gin.Engine, h *menuHandler) {
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
 	menuViewGroup.GET("/sections", h.listSections)
 	menuViewGroup.GET("/sections/:id", h.findSectionByID)
 	menuViewGroup.GET("/items", h.listItems)
 	menuViewGroup.GET("/items/:id", h.findItemByID)
+}
 
-	menuEditGroup := menuGroup.Group("")
+func privateRoutes(r *gin.Engine, h *menuHandler, authMiddleWare gin.HandlerFunc) {
+	menuEditGroup := r.Group("", authMiddleWare)
 	menuEditGroup.POST("/sections", h.createSection)
 	menuEditGroup.PATCH("/sections/:id", h.updateSection)
 	menuEditGroup.DELETE("/sections/:id", h.deleteSection)
@@ -36,26 +44,29 @@ func NewMenuRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Engi
 	menuEditGroup.DELETE("/items/:id", h.deleteItem)
 }
 
+
 // --- Sections --- //
 func (h *menuHandler) listSections(ctx *gin.Context) {
-	sections, err := h.svc.Sections(ctx)
+	sections, err := h.menuSvc.Sections(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": sections})
+
 }
 
 func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	log.Printf("ID: %s", rawID)
-	section, err := h.svc.SectionByID(ctx, rawID)
+	section, err := h.menuSvc.SectionByID(ctx, rawID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": section})
+
 }
 
 // createSection creates a new section.
@@ -73,13 +84,14 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.svc.NewSection(ctx, &section); err != nil {
+	if err := h.menuSvc.NewSection(ctx, &section); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": section})
 }
+
 
 // updateSection update section's data.
 func (h *menuHandler) updateSection(ctx *gin.Context) {
@@ -103,7 +115,7 @@ func (h *menuHandler) updateSection(ctx *gin.Context) {
 	}
 
 	section.ID = id
-	if err := h.svc.UpdateSectionData(ctx, &section); err != nil {
+	if err := h.menuSvc.UpdateSectionData(ctx, &section); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -118,22 +130,25 @@ func (h *menuHandler) deleteSection(ctx *gin.Context) {
 		return
 	}
 	rawID := ctx.Param("id")
-	if err := h.svc.DeleteSection(ctx, rawID); err != nil {
+	if err := h.menuSvc.DeleteSection(ctx, rawID); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "section deleted"})
+
 }
+
 
 // ---  Item  --- //
 func (h *menuHandler) listItems(ctx *gin.Context) {
-	items, err := h.svc.Items(ctx)
+	items, err := h.menuSvc.Items(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": items})
+
 }
 
 // createSection creates a new section.
@@ -150,7 +165,7 @@ func (h *menuHandler) createItem(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.svc.NewItem(ctx, &item); err != nil {
+	if err := h.menuSvc.NewItem(ctx, &item); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -179,7 +194,7 @@ func (h *menuHandler) updateItem(ctx *gin.Context) {
 	}
 
 	item.ID = id
-	if err := h.svc.UpdateItemData(ctx, &item); err != nil {
+	if err := h.menuSvc.UpdateItemData(ctx, &item); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -188,12 +203,13 @@ func (h *menuHandler) updateItem(ctx *gin.Context) {
 }
 func (h *menuHandler) findItemByID(ctx *gin.Context) {
 	rawID := ctx.Param("id")
-	item, err := h.svc.ItemByID(ctx, rawID)
+	item, err := h.menuSvc.ItemByID(ctx, rawID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": item})
+
 }
 
 func (h *menuHandler) deleteItem(ctx *gin.Context) {
@@ -204,9 +220,10 @@ func (h *menuHandler) deleteItem(ctx *gin.Context) {
 	}
 	rawID := ctx.Param("id")
 
-	if err := h.svc.DeleteItem(ctx, rawID); err != nil {
+	if err := h.menuSvc.DeleteItem(ctx, rawID); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "item deleted"})
+
 }

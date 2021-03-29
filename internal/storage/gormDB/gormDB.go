@@ -18,7 +18,7 @@ import (
 )
 
 // Start returns a configured instance of database{}
-func Start(cfg *config.Database, populateDatabase bool) (*gorm.DB, error) {
+func Start(cfg config.Database, populateDatabase bool) (*gorm.DB, error) {
 	var gormCfg = &gorm.Config{
 		Logger: newLogger(),
 		NowFunc: func() time.Time {
@@ -37,7 +37,7 @@ func Start(cfg *config.Database, populateDatabase bool) (*gorm.DB, error) {
 		if err != nil {
 			return db, err
 		}
-		if err := SeedDatabase(db); err != nil {
+		if err := seedDB(db); err != nil {
 			return db, err
 		}
 		if err := dbCloser.Close(); err != nil {
@@ -53,7 +53,7 @@ func Start(cfg *config.Database, populateDatabase bool) (*gorm.DB, error) {
 	return open(cfg, gormCfg)
 }
 
-func open(cfg *config.Database, gormCfg *gorm.Config) (*gorm.DB, error) {
+func open(cfg config.Database, gormCfg *gorm.Config) (*gorm.DB, error) {
 	var dialect gorm.Dialector
 
 	switch strings.ToLower(cfg.Type) {

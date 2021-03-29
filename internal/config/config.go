@@ -28,7 +28,7 @@ type Database struct {
 	Type string `yaml:"type" required:"true"`
 	Host string `yaml:"host" required:"true"`
 	Port uint64 `yaml:"port,omitempty"`
-	User string `required:"true"`
+	User string `yaml:"user" required:"true"`
 	Pass string `yaml:"pass,omitempty"`
 	Name string `yaml:"name,omitempty"`
 }

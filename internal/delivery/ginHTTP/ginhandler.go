@@ -1,4 +1,4 @@
-package ginRouter
+package ginHTTP
 
 import (
 	"net/http"
@@ -10,20 +10,20 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 
-// NewGinEngineHandler instantiates a new Gin engine
-func NewGinEngineHandler() *gin.Engine {
-	// With logger and recovery middlewares
-	r := gin.Default()
-	return r
-}
-
-// Start starts a new http server with Gin act as handler
-func Initialize(cfg config.Router, ginEngine *gin.Engine) *http.Server {
+// NewServer starts a new ginHTTP server with Gin acting as the handler for routes
+func NewServer(cfg config.Router, ginHandler *gin.Engine) *http.Server {
 	logger.Info.Printf("server starting up at %s:%s", cfg.Host, cfg.Port)
 	return &http.Server{
 		Addr:         cfg.Host + ":" + cfg.Port,
-		Handler:      ginEngine,
+		Handler:      ginHandler,
 		ReadTimeout:  time.Duration(cfg.ReadTimeoutSeconds) * time.Second,
 		WriteTimeout: time.Duration(cfg.WriteTimeoutSeconds) * time.Second,
 	}
+}
+
+// NewHandler instantiates a new Gin engine
+func NewHandler(rCfg config.Router) *gin.Engine {
+	// With logger and recovery middlewares
+	r := gin.Default()
+	return r
 }

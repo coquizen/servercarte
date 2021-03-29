@@ -2,15 +2,13 @@ package user
 
 import (
 	"context"
-
-	"github.com/CaninoDev/gastro/server/api"
 )
 
 // Repository represents the user's interface to its data store
 type Repository interface {
-	Create(context.Context, *api.User) error
- 	View(context.Context, *api.User) error
-	Search(context.Context, *api.User) error
-	Update(context.Context, *api.User) error
-	Delete(context.Context, *api.User) error
+	Create(context.Context, *User) error
+ 	View(context.Context, *User) error
+	Search(context.Context, *User) error
+	Update(context.Context, *User) error
+	Delete(context.Context, *User) error
 }

@@ -1,50 +1,14 @@
 package user
 
-import (
-	"context"
+import "github.com/CaninoDev/gastro/server/api"
 
-	"github.com/google/uuid"
-
-	"github.com/CaninoDev/gastro/server/api"
-)
-
-// User is the user's data persistence interface (the above service interface)
+// service struct represent the user that will have admin access.
 type User struct {
-	repo Repository
-}
-
-func Bind(repo Repository) *User {
-	return &User{repo: repo}
-}
-
-func Initialize(repo Repository) *User {
-	return Bind(repo)
-}
-
-// View returns record found by the record's ID
-func (u User) View(ctx context.Context, id uuid.UUID) (*api.User, error) {
-	var user api.User
-	user.ID = id
-	if err := u.repo.View(ctx, &user); err != nil {
-		return &user, err
-	}
-	return &user, nil
-}
-
-// Find finds a record through its various unique attributes
-func (u User) Find(ctx context.Context, user *api.User) error {
-	if err := u.repo.Search(ctx, user); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (u User) Update(ctx context.Context, user *api.User) error {
-	return u.repo.Update(ctx, user)
-}
-
-func (u User) Delete(ctx context.Context, id uuid.UUID) error {
-	var user api.User
-	user.ID = id
-	return u.repo.Delete(ctx, &user)
+	api.Base
+	FirstName string `json:"first_name" gorm:"unique,not null"`
+	LastName  string `json:"last_name,omitempty" gorm:"unique,null"`
+	Address1  string `json:"address_1" gorm:"not null"`
+	Address2  string `json:"address_2,omitempty" gorm:"null"`
+	ZipCode   uint   `json:"zip_code" gorm:"not null"`
+	Email     string `json:"email" gorm:"unique,not null"`
 }
