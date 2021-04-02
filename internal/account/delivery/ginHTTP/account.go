@@ -1,16 +1,15 @@
 package ginHTTP
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/authentication"
 
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/CaninoDev/gastro/server/api/account"
+	"github.com/CaninoDev/gastro/server/domain/account"
 	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 
@@ -21,22 +20,22 @@ type accountHandler struct {
 }
 
 // RegisterRoutes sets up account API endpoint using Gin.
-func RegisterRoutes(authSvc authentication.Service, accountSvc account.Service, r *gin.Engine, authMiddleWare gin.HandlerFunc) {
+func RegisterRoutes(authSvc authentication.Service, accountSvc account.Service, r *gin.Engine, authMiddleWare gin.HandlerFunc, authorizationMiddleware gin.HandlerFunc) {
 	handler := accountHandler{authSvc, accountSvc}
 	publicRoutes(handler, r)
-	privateRoutes(handler, r, authMiddleWare)
+	privateRoutes(handler, r, authMiddleWare,authorizationMiddleware)
 }
 
 func publicRoutes(handler accountHandler, router *gin.Engine) {
 	router.POST("/login", handler.login)
 }
 
-func privateRoutes(handler accountHandler, router *gin.Engine, authMiddleWare gin.HandlerFunc) {
+func privateRoutes(handler accountHandler, router *gin.Engine, authMiddleWare gin.HandlerFunc, authorizationMiddleware gin.HandlerFunc) {
 
-	routerGroup := router.Group("/accounts", authMiddleWare)
+	routerGroup := router.Group("/accounts", authMiddleWare,authorizationMiddleware)
 	routerGroup.GET("", handler.list)
 
-	anotherRouterGroup := router.Group("/account", authMiddleWare)
+	anotherRouterGroup := router.Group("/account", authMiddleWare, authorizationMiddleware)
 	anotherRouterGroup.POST("", handler.create)
 	anotherRouterGroup.PATCH("", handler.update)
 	anotherRouterGroup.DELETE("", handler.delete)
@@ -71,17 +70,18 @@ func (h *accountHandler) login(ctx *gin.Context) {
 		return
 	}
 
-	authenticationToken, err := h.accountSvc.Authenticate(ctx, cred.Username, cred.Password)
+	account, err := h.accountSvc.Authenticate(ctx, cred.Username, cred.Password)
 	if err != nil {
 		ctx.AbortWithError(http.StatusUnauthorized, err).SetMeta("unable to authenticate")
 		return
 	}
+	tokenString, err := h.authSvc.GenerateToken(ctx, account.ID, account.Username, int(account.Role))
 
-	ctx.JSON(http.StatusOK, authenticationToken)
+	ctx.JSON(http.StatusOK, tokenString)
 }
 
 func (h *accountHandler) list(ctx *gin.Context) {
-		accounts, err := h.accountSvc.List(ctx)
+		accounts, err := h.accountSvc.Accounts(ctx)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err).SetMeta("unable to list accounts")
 			return
@@ -108,22 +108,17 @@ func (h *accountHandler) update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updateAccount)
 }
 
-type deleteRequest struct {
-	password string
-}
 
 func (h *accountHandler) delete(ctx *gin.Context) {
-	var deleteReq deleteRequest
-	if err := ctx.ShouldBindJSON(&deleteReq); err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-	}
-
-	accountID, err := h.authSvc.ExtractClaims(ctx.Request)
+	rawID := ctx.Param("id")
+	delID, err := uuid.Parse(rawID)
 	if err != nil {
-		ctx.AbortWithError(http.StatusUnauthorized, fmt.Errorf("unable to extract token: %v", err)).SetMeta("unable to extract token")
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
-	if err := h.accountSvc.Delete(ctx, accountID, deleteReq.password); err != nil {
+	if err := h.accountSvc.Delete(ctx, delID); err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err).SetMeta("unable to delete request")
+		return
 	}
 
 	ctx.JSON(http.StatusOK, "account successfully deleted")

@@ -46,7 +46,6 @@ func Start(cfg config.Database, populateDatabase bool) (*gorm.DB, error) {
 		// Once seeded call function again but with bool set as false
 		return Start(cfg, false)
 	}
-
 	gormCfg.FullSaveAssociations = true
 	gormCfg.AllowGlobalUpdate = true
 

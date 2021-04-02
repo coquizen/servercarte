@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/authentication"
 )
 
 type authenticationMiddleware struct {
@@ -21,7 +21,7 @@ func NewMiddleWare(authSvc authentication.Service) gin.HandlerFunc {
 
 //
 func (m *authenticationMiddleware) handle(ctx *gin.Context) {
-	accountID, err := m.authSvc.ExtractClaims(ctx.Request)
+	claims, err := m.authSvc.ExtractClaims(ctx.Request)
 	if err != nil {
 		if err == authentication.ErrInvalidAccessToken {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -30,7 +30,7 @@ func (m *authenticationMiddleware) handle(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	ctx.Set(authentication.CtxAuthenticationKey, accountID)
+	ctx.Set(authentication.CtxAuthenticationKey, claims)
 }
 
 

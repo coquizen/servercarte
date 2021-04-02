@@ -6,7 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/CaninoDev/gastro/server/api/user"
+	"github.com/CaninoDev/gastro/server/domain/user"
 	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 

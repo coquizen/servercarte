@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CaninoDev/gastro/server/api/authentication"
+	"github.com/CaninoDev/gastro/server/authentication"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -33,6 +33,9 @@ type claims authentication.CustomClaims
 func (j claims) Valid() error {
 	if j.AccountID == uuid.Nil {
 		return errors.New("empty claims")
+	}
+	if j.Username == "" {
+		return errors.New("empty username")
 	}
 	if j.Expiry == 0 {
 		return errors.New("no expiration period specified")
@@ -78,11 +81,14 @@ func New(cfg config.Authentication) (*adapter, error) {
 }
 
 // GenerateToken generates a token with claims encoded
-func (s *adapter) GenerateToken(_ context.Context, accountID uuid.UUID) (string, error) {
+func (s *adapter) GenerateToken(_ context.Context, accountID uuid.UUID, username string, accessLevel int) (string, error) {
+
 	exp := time.Now().Add(s.expirationPeriod).Unix()
 	fmt.Printf("accountID: %v", accountID)
 	cstClaims := &claims{
 		AccountID: accountID,
+		Username: username,
+		Role: accessLevel,
 		Expiry:    exp,
 	}
 
@@ -98,7 +104,7 @@ func (s *adapter) GenerateToken(_ context.Context, accountID uuid.UUID) (string,
 // func (s *adapter) parseToken(tokenString string) (*jwt.Token, error) {
 // 	return jwt.ParseWithClaims(tokenString, &claims{}, func(token *jwt.Token) (interface{}, error) {
 // 		if s.algorithm != token.Method {
-// 			return nil, errors.New("could not decode token; please re-authenticate")
+// 			return nil, errors.CreateEmployeeAccount("could not decode token; please re-authenticate")
 // 		}
 // 		return s.secretKey, nil
 // 	})
@@ -117,21 +123,20 @@ func (s *adapter) ExtractRawToken(req *http.Request) (string, error) {
 }
 
 // ExtractClaims extracts the claims as encoded in the token
-func (s *adapter) ExtractClaims(req *http.Request) (uuid.UUID, error) {
+func (s *adapter) ExtractClaims(req *http.Request) (authentication.CustomClaims, error) {
 	tokenString, err := s.ExtractRawToken(req)
 	if err != nil {
-		return uuid.Nil, err
+		return authentication.CustomClaims{}, err
 	}
 	token, err := s.verifyToken(tokenString)
 	if err != nil {
-		return uuid.Nil, err
+		return authentication.CustomClaims{}, err
 	}
 	if err := s.TokenValid(tokenString); err != nil {
-		return uuid.Nil, err
-	}
-	accountID := token.Claims.(*claims).AccountID
-	// the token claims should conform to MapClaims
-	return accountID, nil
+		return authentication.CustomClaims{}, err	}
+	c := token.Claims.(*claims)
+	a := authentication.CustomClaims{AccountID: c.AccountID, Username: c.Username, Role: c.Role, Expiry: c.Expiry}
+	return a, nil
 }
 
 // TokenValid checks the token validity

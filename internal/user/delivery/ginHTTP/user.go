@@ -1,9 +1,12 @@
 package ginHTTP
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
+	"strings"
 
-	"github.com/CaninoDev/gastro/server/api/user"
+	"github.com/CaninoDev/gastro/server/domain/user"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -20,7 +23,6 @@ func RegisterRoutes(svc user.Service, r *gin.Engine) {
 	userGroup.GET("/:id", h.view)
 	userGroup.PATCH("/:id", h.update)
 	userGroup.DELETE("/:id", h.delete)
-
 }
 
 // TODO: use the jwt token to unwrap claims of the currently logged in user
@@ -39,16 +41,16 @@ func (h *userHandler) view(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": userInformation})
 }
 
-type updateReq struct {
-	FirstName string `json:"first_name,omitempty"`
-	LastName  string `json:"last_name,omitempty"`
-	Address1   string `json:"address_1"`
-	Address2  string `json:"address_2"`
-	ZipCode   uint   `json:"zip_code"`
+type updateRequest struct {
+	Address1 *string `json:"address_1,omitempty"`
+	Address2 *string `json:"address_2,omitempty"`
+	ZipCode *string `json:"zip_code,omitempty"`
+	TelephoneNumber *string `json:"telephone_number,omitempty"`
+	Email *string `json:"email,omitempty"`
 }
 
 func (h userHandler) update(ctx *gin.Context) {
-	var req updateReq
+	var req updateRequest
 	id := ctx.Param("id")
 	if err := ctx.ShouldBindJSON(req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -57,15 +59,27 @@ func (h userHandler) update(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	updateUser := &user.User{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Address1:  req.Address1,
-		Address2: req.Address2,
-		ZipCode:   req.ZipCode,
+	var updateUser user.User
+	if req.Address1 != nil {
+		updateUser.Address1  = *req.Address1
 	}
+	if req.Address2 != nil {
+		updateUser.Address2  = *req.Address2
+	}
+	if req.ZipCode != nil {
+		zipCode, err := strconv.Atoi(*req.ZipCode)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, errors.New("malformed zip code in request"))
+			return
+		}
+		updateUser.ZipCode = uint(zipCode)
+	}
+	if req.TelephoneNumber != nil {
+		updateUser.TelephoneNumber = trimPhoneString(*req.TelephoneNumber)
+	}
+
 	updateUser.ID = parsedID
-	if err := h.svc.Update(ctx, updateUser); err != nil {
+	if err := h.svc.Update(ctx, &updateUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -84,4 +98,8 @@ func (h userHandler) delete(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "successfully deleted"})
+}
+
+func trimPhoneString(str string) string {
+	return strings.Trim(str, "()- ")
 }

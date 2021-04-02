@@ -2,10 +2,9 @@ package gormDB
 
 import (
 	"fmt"
-
-	"github.com/CaninoDev/gastro/server/api/account"
-	"github.com/CaninoDev/gastro/server/api/menu"
-	"github.com/CaninoDev/gastro/server/api/user"
+	"github.com/CaninoDev/gastro/server/domain/account"
+	"github.com/CaninoDev/gastro/server/domain/menu"
+	"github.com/CaninoDev/gastro/server/domain/user"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -24,7 +23,7 @@ func seedDB(db *gorm.DB) error {
 		return err
 	}
 
-	logger.Info.Println("List tables have been dropped...")
+	logger.Info.Println("Accounts tables have been dropped...")
 	logger.Info.Println("Now migrating...")
 	// Migrate model over to db
 	err := db.AutoMigrate(&menu.Section{}, &menu.Item{}, &user.User{}, &account.Account{})
@@ -33,8 +32,11 @@ func seedDB(db *gorm.DB) error {
 	}
 	logger.Info.Println("Successful")
 
+
 	logger.Info.Println("Seeding...")
-	bagel := menu.Item{Title: "Bagel", Description: StrPtr("Your choice of H&H bagel"), ListOrder: 1, Price: 395, Active: true}
+	bagel := menu.Item{Title: "Bagel", Description: StrPtr("Your choice of H&H bagel"), ListOrder: 1,
+		Price: 395,
+		Active: true}
 	bagelwcreamcheese := menu.Item{Title: "Bagel w/ Cream Cheese", Description: StrPtr("Toasted H&H Bagel with your choice of cream cheese."), ListOrder: 2, Price: 595, Active: true}
 	bagelwlox := menu.Item{Title: "Bagel with Lox", Description: StrPtr("Your choice of H&H bagels and Atlantic smoked lox."), ListOrder: 3, Price: 995, Active: true}
 
@@ -86,100 +88,61 @@ func seedDB(db *gorm.DB) error {
 	db.Create(&dinner)
 	logger.Info.Println("Successful")
 
+
 	// Now create admin user/account
 	logger.Info.Println("Creating default admin user/account...")
-	adminUser := user.User{
-		FirstName: "Auguste",
-		LastName:  "Gusteau",
-		Address1:  "31 Rue Cambon",
-		Address2:  "",
-		ZipCode:   75001,
-		Email:     "admin@Gusteaus.com",
-	}
-	db.Create(&adminUser)
 	password := "administrator"
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	adminAccount := &account.Account{
+	db.Create(&account.Account{
 		Username: "admin",
 		Password: string(hashedPassword),
 		Role:     account.Admin,
-	}
-	db.Create(&adminAccount)
+		User: user.User{
+			FirstName:       "Auguste",
+			LastName:        "Gusteau",
+			Address1:        "31 Rue Cambon",
+			ZipCode:         75001,
+			Email:           "admin@Gusteaus.com",
+			TelephoneNumber: "7185550193",
+		},
+	})
 
 	logger.Info.Println("Successful")
 	logger.Info.Println("Creating employee account/user...")
-	employeeUser := user.User{
-		FirstName: "Remy",
-		LastName:  "Ratatouille",
-		Address1:  "10 Rue Egout",
-		Address2:  "",
-		ZipCode:   75002,
-		Email:     "remy@pixar.com",
-	}
-	db.Create(&employeeUser)
 
 	password = "employee"
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	employeeAccount := &account.Account{
+	db.Create(&account.Account{
 		Username: "employee",
 		Password: string(hashedPassword),
 		Role:     account.Employee,
-
-
-	}
-	db.Create(&employeeAccount)
-
+		User: user.User{
+			FirstName: "Remy",
+			LastName:  "Ratatouille",
+			Address1:  "10 Rue Egout",
+			ZipCode:   75002,
+			Email:     "remy@pixar.com",
+			TelephoneNumber: "7185550192",
+		},
+	})
 
 	logger.Info.Println("Successful")
 	logger.Info.Println("Creating guest account/user...")
-	guestUser := user.User{
-		FirstName: "Anton",
-		LastName:  "Ego",
-		Address1:  "99 Tour D'Ivoire",
-		Address2:  "",
-		ZipCode:   75003,
-		Email:     "anton@divoire.com",
-	}
-
-	db.Create(&guestUser)
-
 	password = "guest"
 	hashedPassword, _ = bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	guestAccount := &account.Account{
+	db.Create(&account.Account{
 		Username: "guest",
 		Password: string(hashedPassword),
 		Role:     account.Guest,
-	}
-
-	db.Create(&guestAccount)
-
-	guestAccount.User = guestUser
-	adminAccount.User = adminUser
-	employeeAccount.User = employeeUser
-
-	if err := db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Save(&guestAccount).Error; err != nil {
-		return err
-	}
-	if err := db.Session(&gorm.Session{FullSaveAssociations: true,
-		AllowGlobalUpdate: true}).Save(&adminAccount).Error; err != nil {
-		return err
-	}
-	if err := db.Session(&gorm.Session{FullSaveAssociations: true,
-		AllowGlobalUpdate: true}).Save(&employeeAccount).Error; err != nil {
-		return err
-	}
-	//
-	// // if db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Model(&guestAccount).Association("User").Append(&guestUser); err != nil {
-	// // 	return err
-	// // }
-	// if db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Model(&employeeAccount).Association("User").Append(&employeeUser); err != nil {
-	// 	return err
-	// }
-	//
-	//
-	// if db.Session(&gorm.Session{FullSaveAssociations: true, AllowGlobalUpdate: true}).Model(&adminAccount).Association("User").Append(&adminUser); err != nil {
-	// 	return err
-	// }
+		User: user.User{
+			FirstName: "Anton",
+			LastName:  "Ego",
+			Address1:  "99 Tour D'Ivoire",
+			ZipCode:   75003,
+			Email:     "anton@divoire.com",
+			TelephoneNumber: "7185550194",
+		},
+	})
 
 	logger.Info.Println("Successful")
 

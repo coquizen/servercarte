@@ -11,14 +11,14 @@ type Service interface {
 	Sections(context.Context) (*[]Section, error)
 	SectionByID(context.Context, string) (*Section, error)
 	NewSection(context.Context, *Section) error
-	UpdateSectionData(context.Context, *Section) error
+	UpdateSectionContent(context.Context, *Section) error
 	ReParentSection(context.Context, *Section, uuid.UUID) error
 	DeleteSection(context.Context, string) error
 	Items(context.Context) (*[]Item, error)
 	ItemByID(context.Context, string) (*Item, error)
 	NewItem(context.Context, *Item) error
 	ReParentItem(context.Context, *Item, uuid.UUID) error
-	UpdateItemData(context.Context, *Item) error
+	UpdateItemContent(context.Context, *Item) error
 	DeleteItem(context.Context, string) error
 }
 
@@ -28,6 +28,10 @@ type service struct {
 
 func NewService(menuRepo Repository) *service {
 	return &service{menuRepo}
+}
+
+func (m *service) NewSection(ctx context.Context, section *Section) error {
+	return m.repo.CreateSection(ctx, section)
 }
 
 func (m *service) Sections(ctx context.Context) (*[]Section, error) {
@@ -47,11 +51,7 @@ func (m *service) SectionByID(ctx context.Context, rawID string) (*Section, erro
 	return &section, nil
 }
 
-func (m *service) NewSection(ctx context.Context, section *Section) error {
-	return m.repo.CreateSection(ctx, section)
-}
-
-func (m *service) UpdateSectionData(ctx context.Context, section *Section) error {
+func (m *service) UpdateSectionContent(ctx context.Context, section *Section) error {
 	return m.repo.UpdateSection(ctx, section)
 }
 
@@ -76,6 +76,10 @@ func (m *service) DeleteSection(ctx context.Context, rawID string) error {
 		return err
 	}
 	return m.repo.DeleteSection(ctx, &newParentSection)
+}
+
+func (m *service) NewItem(ctx context.Context, item *Item) error {
+	return m.repo.CreateItem(ctx, item)
 }
 
 func (m *service) Items(ctx context.Context) (*[]Item, error) {
@@ -106,11 +110,7 @@ func (m *service) ReParentItem(ctx context.Context, item *Item, newSectionParent
 	return m.repo.UpdateItemParent(ctx, item, &newParentSection)
 }
 
-func (m *service) NewItem(ctx context.Context, item *Item) error {
-	return m.repo.CreateItem(ctx, item)
-}
-
-func (m *service) UpdateItemData(ctx context.Context, item *Item) error {
+func (m *service) UpdateItemContent(ctx context.Context, item *Item) error {
 	return m.repo.UpdateItem(ctx, item)
 }
 

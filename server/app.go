@@ -1,20 +1,21 @@
 package server
 
 import (
-	"github.com/CaninoDev/gastro/server/internal/delivery/ginHTTP"
 	"log"
 	"net/http"
 
+	"github.com/CaninoDev/gastro/server/internal/delivery/ginHTTP"
+
 	"github.com/CaninoDev/gastro/server/internal/authentication/framework/jwt"
 	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/storage/gormDB"
 	"github.com/CaninoDev/gastro/server/internal/security/bcrypto"
+	"github.com/CaninoDev/gastro/server/internal/store/gormDB"
 
-	"github.com/CaninoDev/gastro/server/api/account"
-	"github.com/CaninoDev/gastro/server/api/authentication"
-	"github.com/CaninoDev/gastro/server/api/menu"
-	"github.com/CaninoDev/gastro/server/api/security"
-	"github.com/CaninoDev/gastro/server/api/user"
+	"github.com/CaninoDev/gastro/server/authentication"
+	"github.com/CaninoDev/gastro/server/domain/account"
+	"github.com/CaninoDev/gastro/server/domain/menu"
+	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/CaninoDev/gastro/server/security"
 
 	accountTransport "github.com/CaninoDev/gastro/server/internal/account/delivery/ginHTTP"
 	accountRepo "github.com/CaninoDev/gastro/server/internal/account/repository/gorm"
@@ -31,7 +32,8 @@ type App struct {
 }
 
 // NewApp serves as the main entry point for this application
-func NewApp(rCfg config.Router, dCfg config.Database, aCfg config.Authentication, sCfg config.Security, seedDatabase bool) *App {
+func NewApp(rCfg config.Router, dCfg config.Database, aCfg config.Authentication, sCfg config.Security,
+	seedDatabase bool) *App {
 	//Set up repositories
 	db, err := gormDB.Start(dCfg, seedDatabase)
 	if err != nil {
@@ -53,16 +55,17 @@ func NewApp(rCfg config.Router, dCfg config.Database, aCfg config.Authentication
 
 	// Setup services
 	menuService := menu.NewService(menuRepository)
-	accountService := account.NewService(accountRepository, userRepository, securityService, authenticationService)
 	userService := user.NewService(userRepository)
+	accountService := account.NewService(accountRepository, userService, securityService, authenticationService)
+
 
 	authenticationMiddleware := authHTTP.NewMiddleWare(authenticationService)
 
 	ginHandler := ginHTTP.NewHandler(rCfg)
-	menuTransport.RegisterRoutes(menuService, authenticationService, ginHandler, authenticationMiddleware)
+	menuTransport.RegisterRoutes(menuService, authenticationService, ginHandler, authenticationMiddleware, ginHTTP.AuthorizationMiddleware(0))
 	userTransport.RegisterRoutes(userService, ginHandler)
 	accountTransport.RegisterRoutes(authenticationService, accountService,
-		ginHandler, authenticationMiddleware)
+		ginHandler, authenticationMiddleware,ginHTTP.AuthorizationMiddleware(0))
 
 	server := ginHTTP.NewServer(rCfg, ginHandler)
 

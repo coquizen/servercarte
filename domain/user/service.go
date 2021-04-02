@@ -7,24 +7,41 @@ import (
 )
 
 
-// Service represents the user application interface
+// UserServicee represents the user application interface
 type Service interface {
+	New(context.Context, *User) error
 	View(context.Context, uuid.UUID) (*User, error)
 	Find(context.Context, *User) error
 	Update(context.Context, *User) error
 	Delete(context.Context, uuid.UUID) error
 }
 
-// service is the user's data persistence interface (the above service interface)
+// service is the user's data persistence interface (the above accountservice interface)
 type service struct {
 	repo Repository
 }
 
-// NewService constructs a new service service and returns an instance containing its persistent store
+// NewService constructs a new accountservice accountservice and returns an instance containing its persistent store
 func NewService(userRepo Repository) *service {
 	return &service{
 		userRepo,
 	}
+}
+//
+// type NewUserRequest struct {
+// 	Name            string
+// 	Address1        string
+// 	Address2        *string
+// 	ZipCode         int
+// 	TelephoneNumber string
+// 	Email           string
+// }
+// New creates a new user. This user can be either a restaurant guest, employee, or manager/owner.
+func (u *service) New(ctx context.Context, user *User) error {
+	if err := user.Validate(); err != nil {
+		return err
+	}
+	return u.repo.Create(ctx, user)
 }
 
 // View returns record found by the record's ID

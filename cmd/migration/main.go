@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CaninoDev/gastro/server/api/account"
-	"github.com/CaninoDev/gastro/server/api/menu"
-	"github.com/CaninoDev/gastro/server/api/user"
+	"github.com/CaninoDev/gastro/server/domain/account"
+	"github.com/CaninoDev/gastro/server/domain/menu"
+	"github.com/CaninoDev/gastro/server/domain/user"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -110,7 +110,7 @@ func PopulateDB () error {
 		return fmt.Errorf("error migrating scheme to db: %v", err)
 	}
 
-	log.Println("New tables are  migrated successfully!")
+	log.Println("CreateEmployeeAccount tables are  migrated successfully!")
 
 	bagel := menu.Item{Title: "Bagel", Description: StrPtr("Your choice of H&H bagel"), ListOrder: 1, Price: 395, Active: true}
 	bagelwcreamcheese := menu.Item{Title: "Bagel w/ Cream Cheese", Description: StrPtr("Toasted H&H Bagel with your choice of cream cheese."), ListOrder: 2, Price: 595, Active: true}

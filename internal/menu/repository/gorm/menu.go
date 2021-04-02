@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"github.com/CaninoDev/gastro/server/api/menu"
+	"github.com/CaninoDev/gastro/server/domain/menu"
 	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 

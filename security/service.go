@@ -11,11 +11,12 @@ type Service interface {
 	IsValid(ctx context.Context, password string) error
 }
 
-type Security struct {
+type security struct {
 	Service
 }
 
-func NewService(secSvc Service) *Security {
-	return &Security{secSvc}
+// NewService returns a new receiver for Security
+func NewService(secSvc Service) *security {
+	return &security{secSvc}
 }
 
