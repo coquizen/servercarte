@@ -26,6 +26,7 @@ func RegisterRoutes(svc menu.Service, authSvc authentication.Service, r *gin.Eng
 func publicRoutes(r *gin.Engine, h *menuHandler) {
 	menuGroup := r.Group("/api/v1")
 	menuViewGroup := menuGroup.Group("")
+	menuViewGroup.GET("/menus", h.listMenus)
 	menuViewGroup.GET("/sections", h.listSections)
 	menuViewGroup.GET("/sections/:id", h.findSectionByID)
 	menuViewGroup.GET("/items", h.listItems)
@@ -42,7 +43,17 @@ func privateRoutes(r *gin.Engine, h *menuHandler, authMiddleWare, authorizationM
 	menuEditGroup.DELETE("/items/:id", h.deleteItem)
 }
 
+// ---   Menus  --- //
+func (h *menuHandler) listMenus(ctx *gin.Context) {
+	menus, err := h.menuSvc.Menus(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
+	ctx.JSON(http.StatusOK, gin.H{"data": menus})
+
+}
 // --- Sections --- //
 func (h *menuHandler) listSections(ctx *gin.Context) {
 	sections, err := h.menuSvc.Sections(ctx)

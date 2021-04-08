@@ -23,8 +23,20 @@ func NewMenuRepository(db *gorm.DB) *menuRepository {
 	return &menuRepository{db}
 }
 
+// ListMenus lists all the menus in the db
+func (r *menuRepository) ListMenus(_ context.Context,) (*[]menu.Section, error) {
+	var sections []menu.Section
 
-// ListSections lists all the users in the db
+
+	if err := r.db.Preload("Items").Preload("SubSections.Items").Preload(clause.Associations).Where(
+		"type = ?",
+		menu.Meal).Find(&sections).Error; err != nil {
+		logger.Error.Printf("db connection error %v", err)
+		return &sections, err
+	}
+	return &sections, nil
+}
+// ListSections lists all the sections in the db
 func (r *menuRepository) ListSections(_ context.Context,) (*[]menu.Section, error) {
 	var sections []menu.Section
 

@@ -7,6 +7,7 @@ import (
 // Repository represents the expected methods that a database implementation must have to satisfy the contracts of
 // this application
 type Repository interface {
+	ListMenus(context.Context) (*[]Section, error)
 	ListSections(context.Context) (*[]Section, error)
 	FindSection(context.Context, *Section) error
 	CreateSection(context.Context, *Section) error

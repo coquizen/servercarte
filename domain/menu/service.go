@@ -8,6 +8,7 @@ import (
 
 // Service describes the expected behavior for manipulating service data.
 type Service interface {
+	Menus(context.Context) (*[]Section, error)
 	Sections(context.Context) (*[]Section, error)
 	SectionByID(context.Context, string) (*Section, error)
 	NewSection(context.Context, *Section) error
@@ -32,6 +33,10 @@ func NewService(menuRepo Repository) *service {
 
 func (m *service) NewSection(ctx context.Context, section *Section) error {
 	return m.repo.CreateSection(ctx, section)
+}
+
+func (m *service) Menus(ctx context.Context) (*[]Section, error) {
+	return m.repo.ListMenus(ctx)
 }
 
 func (m *service) Sections(ctx context.Context) (*[]Section, error) {
