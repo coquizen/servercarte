@@ -49,7 +49,7 @@ func (r *userRepository) Create(ctx context.Context, user *user.User) error {
 	return r.db.Create(&user).Error
 }
 func (r *userRepository) Update(ctx context.Context, user *user.User) error {
-	return r.db.Save(&user).Error
+	return r.db.Model(&user).Updates(&user).Error
 }
 
 func (r *userRepository) Delete(ctx context.Context, user *user.User) error {
