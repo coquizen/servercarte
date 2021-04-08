@@ -27,15 +27,7 @@ func NewService(userRepo Repository) *service {
 		userRepo,
 	}
 }
-//
-// type NewUserRequest struct {
-// 	Name            string
-// 	Address1        string
-// 	Address2        *string
-// 	ZipCode         int
-// 	TelephoneNumber string
-// 	Email           string
-// }
+
 // New creates a new user. This user can be either a restaurant guest, employee, or manager/owner.
 func (u *service) New(ctx context.Context, user *User) error {
 	if err := user.Validate(); err != nil {
@@ -63,6 +55,9 @@ func (u *service) Find(ctx context.Context, user *User) error {
 }
 
 func (u *service) Update(ctx context.Context, user *User) error {
+	if err := user.Validate(); err != nil {
+		return err
+	}
 	return u.repo.Update(ctx, user)
 }
 

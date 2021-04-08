@@ -45,6 +45,22 @@ type NewAccountRequest struct {
 	Email           string      `json:"email"`
 }
 
+func (n *NewAccountRequest) unwrap() (*Account, *user.User) {
+	var newAccount Account
+	var newUser user.User
+
+	newUser.FirstName = n.FirstName
+	newUser.LastName = n.LastName
+	newUser.Address1 = n.Address1
+	newUser.Address2 = *n.Address2
+	newUser.ZipCode = n.ZipCode
+	newUser.Email = n.Email
+
+	newAccount.Username = n.Username
+	newAccount.Role = n.Role
+	return &newAccount, &newUser
+}
+
 // UpdateAccountRequest represent the request struct for Update endpoint
 type UpdateAccountRequest struct {
 	ID       uuid.UUID    `json:"-"`
