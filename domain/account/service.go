@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/CaninoDev/gastro/server/authentication"
 	"github.com/CaninoDev/gastro/server/domain/user"
@@ -15,7 +16,7 @@ import (
 // ACL and RBAC
 type Service interface {
 	New(ctx context.Context, newAccountDetails NewAccountRequest) error
-	Accounts(ctx context.Context) ([]Account, error)
+	Accounts(ctx context.Context) (*[]Account, error)
 	Update(ctx context.Context, request UpdateAccountRequest) error
 	Find(ctx context.Context, username string) (*Account, error)
 	Delete(ctx context.Context, accountID uuid.UUID) error
@@ -40,17 +41,9 @@ func NewService(accountRepo Repository, userSvc user.Service, secSvc security.Se
 // Each user will have zero (restaurant guest) to 1 (
 // restaurant employee). This domain is primarily managed by the restaurant's manager
 func (a *service) New(ctx context.Context, req NewAccountRequest) error {
-	var newUser user.User
-	newUser.FirstName = req.FirstName
-	newUser.LastName = req.LastName
-	newUser.Address1 = req.Address1
-	if req.Address2 != nil {
-		newUser.Address2 = *req.Address2
-	}
-	newUser.ZipCode = req.ZipCode
-	newUser.Email = req.Email
+	newAccount, newUser := req.unwrap()
 	// Ensure that the user doesn't already exist.
-	if err := a.userSvc.Find(ctx, &newUser); err == nil {
+	if err := a.userSvc.Find(ctx, newUser); err == nil {
 		return ErrUserAlreadyExists
 	}
 
@@ -62,37 +55,34 @@ func (a *service) New(ctx context.Context, req NewAccountRequest) error {
 		return err
 	}
 
-	var newAccount Account
-
 	// Make sure username isn't already used by another account
 	if _, err := a.Find(ctx, req.Username); err == nil {
 		return errors.New("username already in use")
 	}
-	newAccount.Username = req.Username
 	newAccount.Role = req.Role
 
 	// Hash the given password to secure storage
 	newAccount.Password = a.secSvc.Hash(ctx, req.Password)
 
 	// Create the user
-	if err := a.userSvc.New(ctx, &newUser); err != nil {
+	if err := a.userSvc.New(ctx, newUser); err != nil {
 		return err
 	}
 	// Assign the user to the newly created account
-	newAccount.User = newUser
+	newAccount.User = *newUser
 
-	if err := a.accountRepo.Create(ctx, &newAccount); err != nil {
+	if err := a.accountRepo.Create(ctx, newAccount); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *service) Accounts(ctx context.Context) ([]Account,error) {
+func (a *service) Accounts(ctx context.Context) (*[]Account,error) {
 	var accounts []Account
 	if err := a.accountRepo.List(ctx, &accounts); err != nil {
-		return accounts, err
+		return &accounts, err
 	}
-	return accounts, nil
+	return &accounts, nil
 }
 
 func (a *service) Find(ctx context.Context, username string) (*Account, error) {
@@ -178,13 +168,16 @@ func (a *service) Update(ctx context.Context, request UpdateAccountRequest) erro
 }
 
 func (a *service) Authenticate(ctx context.Context, username, password string) (*Account, error) {
-
 	acct, err := a.Find(ctx, username)
 	if err != nil {
 		return acct, ErrAccountNotFound
 	}
 	if !a.secSvc.VerifyPasswordMatches(ctx, acct.Password, password) {
 		return acct, ErrUnauthorized
+	}
+	acct.LastLogin = time.Now().UTC()
+	if err := a.accountRepo.Update(ctx, acct); err != nil {
+		return acct, err
 	}
 	return acct, nil
 }
