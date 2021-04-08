@@ -30,7 +30,6 @@ type Account struct {
 	LastLogin time.Time   `json:"last_login,omitempty" gorm:"null"`
 }
 
-
 // NewAccountRequest represent the request struct for Create endpoint
 type NewAccountRequest struct {
 	FirstName       string      `json:"first_name"`

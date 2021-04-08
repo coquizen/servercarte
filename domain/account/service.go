@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"errors"
+	"github.com/CaninoDev/gastro/server/internal/helpers"
 	"time"
 
 	"github.com/CaninoDev/gastro/server/authentication"
@@ -44,9 +45,13 @@ func (a *service) New(ctx context.Context, req NewAccountRequest) error {
 	newAccount, newUser := req.unwrap()
 	// Ensure that the user doesn't already exist.
 	if err := a.userSvc.Find(ctx, newUser); err == nil {
-		return ErrUserAlreadyExists
+		return user.ErrUserAlreadyExists
 	}
 
+	// Check to see if the email is in the right format
+	if !helpers.IsEmailFormat(newUser.Email) {
+		return errors.New("email is invalid")
+	}
 	// Check if password matches and complies with policy
 	if !a.secSvc.ConfirmationChecker(ctx, req.Password, req.PasswordConfirm) {
 		return errors.New("passwords don't match")
@@ -54,6 +59,8 @@ func (a *service) New(ctx context.Context, req NewAccountRequest) error {
 	if err := a.secSvc.IsValid(ctx, req.Password); err != nil {
 		return err
 	}
+
+
 
 	// Make sure username isn't already used by another account
 	if _, err := a.Find(ctx, req.Username); err == nil {

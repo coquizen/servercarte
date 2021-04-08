@@ -95,7 +95,7 @@ func StrPtr(s string) *string {
 	return &s
 }
 
-// PopulateDatabase populates the db with sample data.
+// PopulateDB populates the db with sample data.
 func PopulateDB () error {
 	// Drop all Tables
 	db.Migrator().DropTable(&menu.Section{})

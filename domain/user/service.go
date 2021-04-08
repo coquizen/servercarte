@@ -7,7 +7,7 @@ import (
 )
 
 
-// UserServicee represents the user application interface
+// Service represents the user application interface
 type Service interface {
 	New(context.Context, *User) error
 	View(context.Context, uuid.UUID) (*User, error)
@@ -16,12 +16,12 @@ type Service interface {
 	Delete(context.Context, uuid.UUID) error
 }
 
-// service is the user's data persistence interface (the above accountservice interface)
+// service is the user's data persistence interface (the Service interface)
 type service struct {
 	repo Repository
 }
 
-// NewService constructs a new accountservice accountservice and returns an instance containing its persistent store
+// NewService instantiates an user service and returns an instance containing its persistent store
 func NewService(userRepo Repository) *service {
 	return &service{
 		userRepo,

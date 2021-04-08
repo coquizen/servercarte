@@ -47,7 +47,7 @@ type config struct {
 	Authentication Authentication `yaml:"authentication"`
 }
 
-// LoadConfigFile loads the configuration from a local .yml into the struct
+// Load loads the configuration from a local .yml into the struct
 func Load(filePath string) (Router, Database, Security, Authentication, error) {
 	var cfg config
 	f, err := os.Open(filePath)

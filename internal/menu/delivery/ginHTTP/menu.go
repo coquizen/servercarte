@@ -82,9 +82,9 @@ type newSectionRequest struct {
 	Title string `json:"title,required"`
 	Description *string `json:"description,omitempty"`
 	Active bool `json:"active"`
-	Visible bool `json: "visible"`
+	Visible bool `json:"visible"`
 	Type int `json:"type"`
-	ListOrder uint `json: "list_order"`
+	ListOrder uint `json:"list_order"`
 }
 // createSection creates a new section.
 func (h *menuHandler) createSection(ctx *gin.Context) {

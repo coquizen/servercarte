@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/CaninoDev/gastro/server/domain/account"
-	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 
 type accountHandler struct {
@@ -44,17 +43,15 @@ func privateRoutes(handler accountHandler, router *gin.Engine, authMiddleWare gi
 func (h *accountHandler) create(ctx *gin.Context) {
 	var newAccount account.NewAccountRequest
 	if err := ctx.ShouldBindJSON(&newAccount); err != nil {
-		ctx.AbortWithError(http.StatusUnprocessableEntity, err).SetMeta("malformed, partial, or missing registration request")
-	}
-
-	if err := h.accountSvc.New(ctx, newAccount); err != nil {
-		if err := ctx.AbortWithError(http.StatusNotAcceptable, err).Error; err != nil {
-			logger.Error.Println(err)
-		}
+		ctx.JSON(http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	if err := h.accountSvc.New(ctx, newAccount); err != nil {
+		ctx.JSON(http.StatusNotAcceptable, err)
+			return
+	}
+		ctx.JSON(http.StatusOK, nil)
 }
 
 
@@ -70,12 +67,12 @@ func (h *accountHandler) login(ctx *gin.Context) {
 		return
 	}
 
-	account, err := h.accountSvc.Authenticate(ctx, cred.Username, cred.Password)
+	acct, err := h.accountSvc.Authenticate(ctx, cred.Username, cred.Password)
 	if err != nil {
-		ctx.AbortWithError(http.StatusUnauthorized, err).SetMeta("unable to authenticate")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	tokenString, err := h.authSvc.GenerateToken(ctx, account.ID, account.Username, int(account.Role))
+	tokenString, err := h.authSvc.GenerateToken(ctx, acct.ID, acct.Username, int(acct.Role))
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -87,7 +84,7 @@ func (h *accountHandler) login(ctx *gin.Context) {
 func (h *accountHandler) list(ctx *gin.Context) {
 		accounts, err := h.accountSvc.Accounts(ctx)
 		if err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err).SetMeta("unable to list accounts")
+			ctx.JSON(http.StatusInternalServerError, err)
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{"data": *accounts})
@@ -96,7 +93,7 @@ func (h *accountHandler) list(ctx *gin.Context) {
 func (h *accountHandler) update(ctx *gin.Context) {
 	var updateAccount account.UpdateAccountRequest
 	if err := ctx.ShouldBindJSON(&updateAccount); err != nil {
-		ctx.AbortWithError(http.StatusUnprocessableEntity, err).SetMeta("unable to process update request")
+		ctx.JSON(http.StatusUnprocessableEntity, err)
 		return
 	}
 	accountID, exists := ctx.Get("accountID")
@@ -106,9 +103,9 @@ func (h *accountHandler) update(ctx *gin.Context) {
 	}
 	updateAccount.ID = accountID.(uuid.UUID)
 	if err := h.accountSvc.Update(ctx, updateAccount); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err).SetMeta("unable to update request")
+		ctx.JSON(http.StatusBadRequest, err)
 		return
-		}
+	}
 	ctx.JSON(http.StatusOK, updateAccount)
 }
 
@@ -121,7 +118,7 @@ func (h *accountHandler) delete(ctx *gin.Context) {
 		return
 	}
 	if err := h.accountSvc.Delete(ctx, delID); err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err).SetMeta("unable to delete request")
+		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
 

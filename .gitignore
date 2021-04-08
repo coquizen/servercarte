@@ -18,7 +18,6 @@
 .DS_Store
 *.[56789ao]
 *.a[56789o]
-*.so
 *.pyc
 ._*
 .nfs.*
@@ -26,7 +25,6 @@
 *~
 *.orig
 *.rej
-*.exe
 .*.swp
 core
 *.cgo*.go

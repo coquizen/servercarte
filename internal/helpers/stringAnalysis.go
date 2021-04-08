@@ -28,7 +28,7 @@ func HasMixedCase(str string) bool {
 	return false
 }
 
-// HasSpecialChars checks to see if a string has any special (printable) characters.
+// HasSpecialChar checks to see if a string has any special (printable) characters.
 func HasSpecialChar(str string) bool {
 	var specialChar = "!@#$%^&*"
 	for _, character := range str {

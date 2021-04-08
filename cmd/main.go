@@ -20,5 +20,7 @@ func main() {
 	}
 
 	app := server.NewApp(routerC, databaseC, authC, securityC, *seedDatabase)
-	app.Run()
+	if err := app.Run(); err != nil {
+		log.Fatal(err)
+	}
 }

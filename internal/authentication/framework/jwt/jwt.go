@@ -110,7 +110,7 @@ func (s *adapter) GenerateToken(_ context.Context, accountID uuid.UUID, username
 // 	})
 // }
 
-// ExtractRawsToken extracts the token string from the request header
+// ExtractRawToken extracts the token string from the request header
 func (s *adapter) ExtractRawToken(req *http.Request) (string, error) {
 	authorizationHeader := req.Header.Get("Authorization")
 	if authorizationHeader != "" {
