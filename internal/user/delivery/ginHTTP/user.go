@@ -1,9 +1,7 @@
 package ginHTTP
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/CaninoDev/gastro/server/domain/user"
@@ -44,7 +42,7 @@ func (h *userHandler) view(ctx *gin.Context) {
 type updateRequest struct {
 	Address1 *string `json:"address_1,omitempty"`
 	Address2 *string `json:"address_2,omitempty"`
-	ZipCode *string `json:"zip_code,omitempty"`
+	ZipCode *uint `json:"zip_code,omitempty"`
 	TelephoneNumber *string `json:"telephone_number,omitempty"`
 	Email *string `json:"email,omitempty"`
 }
@@ -67,12 +65,7 @@ func (h userHandler) update(ctx *gin.Context) {
 		updateUser.Address2  = *req.Address2
 	}
 	if req.ZipCode != nil {
-		zipCode, err := strconv.Atoi(*req.ZipCode)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("malformed zip code in request"))
-			return
-		}
-		updateUser.ZipCode = uint(zipCode)
+		updateUser.ZipCode = *req.ZipCode
 	}
 	if req.TelephoneNumber != nil {
 		updateUser.TelephoneNumber = trimPhoneString(*req.TelephoneNumber)
