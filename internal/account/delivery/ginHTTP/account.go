@@ -20,7 +20,7 @@ type accountHandler struct {
 }
 
 // RegisterRoutes sets up account API endpoint using Gin.
-func RegisterRoutes(authSvc authentication.Service, accountSvc account.Service, r *gin.Engine, authMiddleWare gin.HandlerFunc, authorizationMiddleware gin.HandlerFunc) {
+func RegisterRoutes(accountSvc account.Service, authSvc authentication.Service, r *gin.Engine, authMiddleWare gin.HandlerFunc, authorizationMiddleware gin.HandlerFunc) {
 	handler := accountHandler{authSvc, accountSvc}
 	publicRoutes(handler, r)
 	privateRoutes(handler, r, authMiddleWare,authorizationMiddleware)
@@ -32,7 +32,7 @@ func publicRoutes(handler accountHandler, router *gin.Engine) {
 
 func privateRoutes(handler accountHandler, router *gin.Engine, authMiddleWare gin.HandlerFunc, authorizationMiddleware gin.HandlerFunc) {
 
-	routerGroup := router.Group("/accounts", authMiddleWare,authorizationMiddleware)
+	routerGroup := router.Group("/accounts", authMiddleWare, authorizationMiddleware)
 	routerGroup.GET("", handler.list)
 
 	anotherRouterGroup := router.Group("/account", authMiddleWare, authorizationMiddleware)
@@ -76,8 +76,12 @@ func (h *accountHandler) login(ctx *gin.Context) {
 		return
 	}
 	tokenString, err := h.authSvc.GenerateToken(ctx, account.ID, account.Username, int(account.Role))
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-	ctx.JSON(http.StatusOK, tokenString)
+	ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
 func (h *accountHandler) list(ctx *gin.Context) {
@@ -86,7 +90,7 @@ func (h *accountHandler) list(ctx *gin.Context) {
 			ctx.AbortWithError(http.StatusInternalServerError, err).SetMeta("unable to list accounts")
 			return
 		}
-		ctx.JSON(http.StatusOK, accounts)
+		ctx.JSON(http.StatusOK, gin.H{"data": *accounts})
 }
 
 func (h *accountHandler) update(ctx *gin.Context) {

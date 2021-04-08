@@ -64,8 +64,7 @@ func NewApp(rCfg config.Router, dCfg config.Database, aCfg config.Authentication
 	ginHandler := ginHTTP.NewHandler(rCfg)
 	menuTransport.RegisterRoutes(menuService, authenticationService, ginHandler, authenticationMiddleware, ginHTTP.AuthorizationMiddleware(0))
 	userTransport.RegisterRoutes(userService, ginHandler)
-	accountTransport.RegisterRoutes(authenticationService, accountService,
-		ginHandler, authenticationMiddleware,ginHTTP.AuthorizationMiddleware(0))
+	accountTransport.RegisterRoutes(accountService, authenticationService, ginHandler, authenticationMiddleware, ginHTTP.AuthorizationMiddleware(0))
 
 	server := ginHTTP.NewServer(rCfg, ginHandler)
 
