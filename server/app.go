@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/CaninoDev/gastro/server/domain/security"
+
 	"github.com/CaninoDev/gastro/server/internal/delivery/ginHTTP"
 
 	"github.com/CaninoDev/gastro/server/internal/authentication/framework/jwt"
@@ -15,8 +17,6 @@ import (
 	"github.com/CaninoDev/gastro/server/domain/account"
 	"github.com/CaninoDev/gastro/server/domain/menu"
 	"github.com/CaninoDev/gastro/server/domain/user"
-	"github.com/CaninoDev/gastro/server/security"
-
 	accountTransport "github.com/CaninoDev/gastro/server/internal/account/delivery/ginHTTP"
 	accountRepo "github.com/CaninoDev/gastro/server/internal/account/repository/gorm"
 	authHTTP "github.com/CaninoDev/gastro/server/internal/authentication/delivery/ginHTTP"
@@ -28,7 +28,7 @@ import (
 
 // App struct represents this application
 type App struct {
-	httpServer     *http.Server
+	httpServer *http.Server
 }
 
 // NewApp serves as the main entry point for this application
@@ -57,7 +57,6 @@ func NewApp(rCfg config.Router, dCfg config.Database, aCfg config.Authentication
 	menuService := menu.NewService(menuRepository)
 	userService := user.NewService(userRepository)
 	accountService := account.NewService(accountRepository, userService, securityService, authenticationService)
-
 
 	authenticationMiddleware := authHTTP.NewMiddleWare(authenticationService)
 

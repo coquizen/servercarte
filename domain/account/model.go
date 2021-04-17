@@ -70,5 +70,19 @@ type UpdateAccountRequest struct {
 	Role     *AccessLevel `json:"role,omitempty"`
 }
 
+func (n *UpdateAccountRequest) unwrap() (*Account, *user.User) {
+	var updatingAccount Account
+	var updatingUser user.User
+
+	updatingAccount.ID = n.ID
+	updatingAccount.Role = *n.Role
+
+	updatingUser.Address1 = *n.Address1
+	updatingUser.Address2 = *n.Address2
+	updatingUser.ZipCode = *n.ZipCode
+	updatingUser.Email = *n.Email
+
+	return &updatingAccount, &updatingUser
+}
 
 

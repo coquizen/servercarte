@@ -13,6 +13,10 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/logger"
 )
 
+var (
+	ErrSectionNotFound = errors.New("section could not be found in the database")
+	ErrItemNotFound = errors.New("item could not be found in the database")
+)
 // menuRepository represents the client to its persistent repository
 type menuRepository struct {
 	db *gorm.DB

@@ -15,14 +15,13 @@ import (
 type accountHandler struct {
 	authSvc    authentication.Service
 	accountSvc account.Service
-
 }
 
 // RegisterRoutes sets up account API endpoint using Gin.
 func RegisterRoutes(accountSvc account.Service, authSvc authentication.Service, r *gin.Engine, authMiddleWare gin.HandlerFunc, authorizationMiddleware gin.HandlerFunc) {
 	handler := accountHandler{authSvc, accountSvc}
 	publicRoutes(handler, r)
-	privateRoutes(handler, r, authMiddleWare,authorizationMiddleware)
+	privateRoutes(handler, r, authMiddleWare, authorizationMiddleware)
 }
 
 func publicRoutes(handler accountHandler, router *gin.Engine) {
@@ -47,13 +46,13 @@ func (h *accountHandler) create(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.accountSvc.New(ctx, newAccount); err != nil {
-		ctx.JSON(http.StatusNotAcceptable, err)
-			return
+	createdAccount, err := h.accountSvc.New(ctx, newAccount)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
 	}
-		ctx.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, createdAccount)
 }
-
 
 type credentials struct {
 	Username string `json:"username" binding:"required"`
@@ -78,16 +77,22 @@ func (h *accountHandler) login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
+	claims, err := h.authSvc.ParseTokenClaims(tokenString)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"token": tokenString, "expiry": claims.Expiry})
 }
 
 func (h *accountHandler) list(ctx *gin.Context) {
-		accounts, err := h.accountSvc.Accounts(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, err)
-			return
-		}
-		ctx.JSON(http.StatusOK, gin.H{"data": *accounts})
+	accounts, err := h.accountSvc.Accounts(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": accounts})
 }
 
 func (h *accountHandler) update(ctx *gin.Context) {
@@ -109,7 +114,6 @@ func (h *accountHandler) update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, updateAccount)
 }
 
-
 func (h *accountHandler) delete(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	delID, err := uuid.Parse(rawID)
@@ -124,4 +128,3 @@ func (h *accountHandler) delete(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, "account successfully deleted")
 }
-

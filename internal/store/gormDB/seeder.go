@@ -34,9 +34,28 @@ func seedDB(db *gorm.DB) error {
 
 	logger.Info.Println("Seeding...")
 
-	bagel := menu.Item{Title: "Bagel", Description: StrPtr("Your choice of H&H bagel"), Type: 0, ListOrder: 1, Price:  395, Active: true}
-	bagelwcreamcheese := menu.Item{Title: "Bagel w/ Cream Cheese", Description: StrPtr("Toasted H&H Bagel with your choice of cream cheese."), Type: 0, ListOrder: 2, Price: 595, Active: true}
-	bagelwlox := menu.Item{Title: "Bagel with Lox", Description: StrPtr("Your choice of H&H bagels and Atlantic smoked lox."), Type: 0, ListOrder: 3, Price: 995, Active: true}
+	everything := menu.Item{Title: "Everything", Description: StrPtr("w/ onions, sesame seeds, & poppy seeds"), ListOrder : 1, Type: menu.AddOn, Price: 0, Active: true}
+	sesame := menu.Item{Title: "Sesame Seed", ListOrder : 2, Type: menu.AddOn, Price: 0, Active: true}
+	poppy := menu.Item{Title: "Poppy Seed", ListOrder : 3, Type: menu.AddOn, Price: 0, Active: true}
+	plain := menu.Item{Title: "Plain", ListOrder : 4, Type: menu.AddOn, Price: 0, Active: true}
+	chocolate := menu.Item{Title: "Chocolate Chip", Description: StrPtr("w/ Godiva chocolate chips"), ListOrder: 5, Type: menu.AddOn, Price: 0, Active: true}
+	onion := menu.Item{Title: "Onion", ListOrder : 6, Type: menu.AddOn, Price: 0, Active: true}
+
+	bagelcontainer := menu.Section{Title: "Bagel Types", ListOrder: 0, Type: menu.Container, Items: []menu.Item{everything, chocolate, sesame, poppy, plain, onion}}
+
+	bagel := menu.Item{Title: "Bagel", Description: StrPtr("Your choice of H&H bagel"), Type: menu.Plate, ListOrder: 1, Price:  395, Active: true, AddOn: &bagelcontainer}
+
+	plaincreamcheese := menu.Item{Title: "Plain Cream Cheese", ListOrder: 1, Price: 50, Type: menu.Condiment, Active: true}
+	scallioncreamcheese := menu.Item{Title: "Scallion Cream Cheese", ListOrder: 2, Price: 100, Type: menu.Condiment, Active: true}
+	lightplaincreamcheese := menu.Item{Title: "Light Cream Cheese", ListOrder: 3, Price: 25, Type: menu.Condiment, Active: true}
+	garliccreamcheese := menu.Item{Title: "Garlic Cream Cheese", ListOrder: 4, Price: 75, Type: menu.Condiment, Active: true}
+	onionandchivecreamcheese := menu.Item{Title: "Onion & Chive Cream Cheese", ListOrder: 5, Price: 150, Type: menu.Condiment, Active: true}
+	smokedsalmoncreamcheese := menu.Item{Title: "Smoked Salmon Cream Cheese", ListOrder: 6, Price: 50, Type: menu.Condiment, Active: true}
+
+	bagelcondimentcontainer := menu.Section{Title: "Bagel Condiments", ListOrder: 0, Type: menu.Container, Active: true, Items: []menu.Item{plaincreamcheese, scallioncreamcheese, lightplaincreamcheese, onionandchivecreamcheese,garliccreamcheese, smokedsalmoncreamcheese }}
+
+	bagelwcreamcheese := menu.Item{Title: "Bagel w/ Cream Cheese", Description: StrPtr("Toasted H&H Bagel with your choice of cream cheese."), Type: menu.Plate, ListOrder: 2, Price: 595, Active: true, AddOn: &bagelcontainer, Condiments: &bagelcondimentcontainer}
+	bagelwlox := menu.Item{Title: "Bagel with Lox", Description: StrPtr("Your choice of H&H bagels and Atlantic smoked lox."), Type: menu.Plate, ListOrder: 3, Price: 995, Active: true, AddOn: &bagelcontainer}
 
 	bagels := menu.Section{Title: "Bagels", ListOrder: 1, Type: 1, Items: []menu.Item{bagel, bagelwcreamcheese, bagelwlox}}
 
@@ -60,7 +79,7 @@ func seedDB(db *gorm.DB) error {
 	sunomonosalad := menu.Item{Title: "Sunomono Salad", Description: StrPtr("Thin rice noodles, shrimp, crab, soy sauce and rice vinegar."), Type: 0, Price: 395, ListOrder: 1, Active: true}
 	cobbsalad := menu.Item{Title: "Cobb Salad", Description: StrPtr("Blue cheese, grilled chicken breasts, red wine vinegar, eggs, and bacon."), Type: 0, Price: 645, ListOrder: 2, Active: true}
 	handpies := menu.Item{Title: "Korean Beef Hand Pies", Description: StrPtr("Beef short rubes, rice noodles, hoisin sauce, chili sauce, and soy sauce."), Type: 0, ListOrder: 3, Price: 795, Active: true}
-	bruschetta := menu.Item{Title: "Bruchetta", Description: StrPtr("Toasted baguettes with goat cheese, brown sugar, and cherry tomatoes."), Type: 0, ListOrder: 4, Price: 495, Active: true}
+	bruschetta := menu.Item{Title: "Bruschetta", Description: StrPtr("Toasted baguettes with goat cheese, brown sugar, and cherry tomatoes."), Type: 0, ListOrder: 4, Price: 495, Active: true}
 
 	starters := menu.Section{Title: "Starters", ListOrder: 1, Type: 2, Items: []menu.Item{sunomonosalad, cobbsalad, handpies, bruschetta}}
 
@@ -90,8 +109,8 @@ func seedDB(db *gorm.DB) error {
 
 	chocolatemousse := menu.Item{Title: "Chocolate Mousse & Whipped Cream", ListOrder: 1, Type: 0, Price: 1250, Active: true}
 	tiramisu := menu.Item{Title: "Tiramisu", ListOrder: 2, Type: 0, Price: 1000, Active: true}
-	cheesecake := menu.Item{Title: "Housemade Cheesecake with Fresh Strawberries", Description:  StrPtr("Warm chocolate sauce"), Type: 0, ListOrder: 3, Price: 1295, Active: true}
-	gastrotartufo := menu.Item{Title: "Gastro's Tartufo", Description:  StrPtr("Van Leeuwen Chocolate & Vanilla Bean Ice Cream rolled in Chocolate Chunks"), Type: 0, ListOrder: 4, Price: 1225, Active: true}
+	cheesecake := menu.Item{Title: "Housemade Cheesecake with Fresh Strawberries", Description: StrPtr("Warm chocolate sauce"), Type: 0, ListOrder: 3, Price: 1295, Active: true}
+	gastrotartufo := menu.Item{Title: "Gastro's Tartufo", Description: StrPtr("Van Leeuwen Chocolate & Vanilla Bean Ice Cream rolled in Chocolate Chunks"), Type: 0, ListOrder: 4, Price: 1225, Active: true}
 
 	desserts := menu.Section{Title: "Desserts", Type: 0, ListOrder: 4, Items: []menu.Item{chocolatemousse,tiramisu, cheesecake, gastrotartufo}}
 	db.Create(&desserts)

@@ -23,6 +23,11 @@ type Service interface {
 	DeleteItem(context.Context, string) error
 }
 
+var (
+	NullItem    = Item{}
+	NullSection = Section{}
+)
+
 type service struct {
 	repo Repository
 }
@@ -46,12 +51,12 @@ func (m *service) Sections(ctx context.Context) (*[]Section, error) {
 func (m *service) SectionByID(ctx context.Context, rawID string) (*Section, error) {
 	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return &Section{}, err
+		return &NullSection, err
 	}
 	var section Section
 	section.ID = id
 	if err := m.repo.FindSection(ctx, &section); err != nil {
-		return &section, err
+		return &NullSection, err
 	}
 	return &section, nil
 }
@@ -71,16 +76,13 @@ func (m *service) ReParentSection(ctx context.Context, section *Section, newPare
 }
 
 func (m *service) DeleteSection(ctx context.Context, rawID string) error {
-	newSectionParentID, err := uuid.Parse(rawID)
+	deletingSectionID, err := uuid.Parse(rawID)
 	if err != nil {
 		return err
 	}
-	var newParentSection Section
-	newParentSection.ID = newSectionParentID
-	if err := m.repo.FindSection(ctx, &newParentSection); err != nil {
-		return err
-	}
-	return m.repo.DeleteSection(ctx, &newParentSection)
+	var deletingSection Section
+	deletingSection.ID = deletingSectionID
+	return m.repo.DeleteSection(ctx, &deletingSection)
 }
 
 func (m *service) NewItem(ctx context.Context, item *Item) error {
@@ -94,12 +96,12 @@ func (m *service) Items(ctx context.Context) (*[]Item, error) {
 func (m *service) ItemByID(ctx context.Context, rawID string) (*Item, error) {
 	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return &Item{}, err
+		return &NullItem, err
 	}
 	var item Item
 	item.ID = id
 	if err := m.repo.FindItem(ctx, &item); err != nil {
-		return &item, err
+		return &NullItem, err
 	}
 
 	return &item, nil
@@ -132,8 +134,3 @@ func (m *service) DeleteItem(ctx context.Context, rawID string) error {
 	}
 	return m.repo.DeleteItem(ctx, &item)
 }
-
-
-
-
-

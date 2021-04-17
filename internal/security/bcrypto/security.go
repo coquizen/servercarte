@@ -1,7 +1,6 @@
 package bcrypto
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -10,6 +9,8 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/config"
 	"github.com/CaninoDev/gastro/server/internal/helpers"
 )
+
+var ErrPasswordsDoNotMatch = errors.New("passwords do not match")
 
 type BCrypt struct {
 	Length        int
@@ -20,27 +21,30 @@ type BCrypt struct {
 }
 
 func NewSecurityFramework(cfg config.Security) *BCrypt {
-	return &BCrypt{cfg.Length, cfg.MixedCase,cfg.AlphaNum, cfg.SpecialChar,cfg.CheckPrevious}
+	return &BCrypt{cfg.Length, cfg.MixedCase, cfg.AlphaNum, cfg.SpecialChar, cfg.CheckPrevious}
 }
 
 // ConfirmationChecker compares two given literal password inputs and returns whether they are equivalent.
-func (s *BCrypt) ConfirmationChecker(_ context.Context, password, confirmPassword string) bool {
-	return password == confirmPassword
+func (s *BCrypt) ConfirmationChecker(password, confirmPassword string) error {
+	if password != confirmPassword {
+		return ErrPasswordsDoNotMatch
+	}
+	return nil
 }
 
 // VerifyPasswordMatches verifies that a given password is equivalent to its hashed form
-func (s *BCrypt) VerifyPasswordMatches(_ context.Context, hashedPW, givenPW string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPW), []byte(givenPW)) == nil
+func (s *BCrypt) VerifyPasswordMatches(hashedPW, givenPW string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPW), []byte(givenPW))
 }
 
 // Hash takes as input a given password and hashes it so it is suitable for persistent repository
-func (s *BCrypt) Hash(_ context.Context, password string) string {
+func (s *BCrypt) Hash(password string) string {
 	encryptedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(encryptedPassword)
 }
 
 // IsValid validates whether a given string complies with the policy as declared by PasswordPolicy
-func (s *BCrypt) IsValid(_ context.Context, password string) error {
+func (s *BCrypt) IsValid(password string) error {
 	// TODO: add conditional to check if password has been used previously.
 	if s.Length > len(password) {
 		return fmt.Errorf("password too short; should have %d characters", s.Length)

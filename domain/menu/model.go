@@ -18,15 +18,15 @@ const (
 // Section struct defines the service structure.
 type Section struct {
 	domain.Base
-	Title       string     `json:"title" gorm:"unique,not null"`
-	Description *string    `json:"description,omitempty"`
-	Active      bool       `json:"active" gorm:"default:true"`
+	Title       string      `json:"title" gorm:"unique,not null"`
+	Description *string     `json:"description,omitempty"`
+	Active      bool        `json:"active" gorm:"default:true"`
 	Type        SectionType `json:"type" gorm:"not null, default: 0"`
-	Visible     bool       `json:"visible" gorm:"default:true"`
-	ListOrder   uint       `json:"list_order" gorm:"default:0"`
-	SectionID   *uuid.UUID `json:"section_id,omitempty"`
-	SubSections []Section  `json:"subsections,omitempty" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Items       []Item     `json:"items,omitempty" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Visible     bool        `json:"visible" gorm:"default:true"`
+	ListOrder   uint        `json:"list_order" gorm:"default:0"`
+	SectionID   *uuid.UUID  `json:"section_id,omitempty"`
+	SubSections []Section   `json:"subsections,omitempty" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Items       []Item      `json:"items,omitempty" gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 func (s *Section) Validate() error {
 	if s.Title == "" {
@@ -62,9 +62,11 @@ type Item struct {
 	Type        ItemType   `json:"type" gorm:"default:0"`
 	ListOrder   uint       `json:"list_order" gorm:"default:0"`
 	SectionID   *uuid.UUID `json:"section_id"`
+	AddOnID     *uuid.UUID `json:"add_on_id"`
+	AddOn       *Section   `json:"add_on" gorm:"foreignKey:AddOnID"`
+	CondimentsID *uuid.UUID `json:"condiments_id"`
+	Condiments  *Section   `json:"condiments" gorm:"foreignKey:CondimentsID"`
 }
-
-
 
 func (i *Item) Validate() error {
 	if i.Title == "" {

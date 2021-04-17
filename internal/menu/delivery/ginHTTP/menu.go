@@ -34,7 +34,7 @@ func publicRoutes(r *gin.Engine, h *menuHandler) {
 }
 
 func privateRoutes(r *gin.Engine, h *menuHandler, authMiddleWare, authorizationMiddleware gin.HandlerFunc) {
-	menuEditGroup := r.Group("/api/v1", authMiddleWare,authorizationMiddleware)
+	menuEditGroup := r.Group("/api/v1", authMiddleWare, authorizationMiddleware)
 	menuEditGroup.POST("/sections", h.createSection)
 	menuEditGroup.PATCH("/sections/:id", h.updateSection)
 	menuEditGroup.DELETE("/sections/:id", h.deleteSection)
@@ -54,6 +54,7 @@ func (h *menuHandler) listMenus(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": menus})
 
 }
+
 // --- Sections --- //
 func (h *menuHandler) listSections(ctx *gin.Context) {
 	sections, err := h.menuSvc.Sections(ctx)
@@ -69,6 +70,7 @@ func (h *menuHandler) listSections(ctx *gin.Context) {
 func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 	rawID := ctx.Param("id")
 	log.Printf("ID: %s", rawID)
+
 	section, err := h.menuSvc.SectionByID(ctx, rawID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -79,13 +81,14 @@ func (h *menuHandler) findSectionByID(ctx *gin.Context) {
 }
 
 type newSectionRequest struct {
-	Title string `json:"title,required"`
+	Title       string  `json:"title"`
 	Description *string `json:"description,omitempty"`
-	Active bool `json:"active"`
-	Visible bool `json:"visible"`
-	Type int `json:"type"`
-	ListOrder uint `json:"list_order"`
+	Active      bool    `json:"active"`
+	Visible     bool    `json:"visible"`
+	Type        int     `json:"type"`
+	ListOrder   uint    `json:"list_order"`
 }
+
 // createSection creates a new section.
 func (h *menuHandler) createSection(ctx *gin.Context) {
 	var reqSection newSectionRequest
@@ -110,7 +113,6 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, &section)
 }
-
 
 // updateSection update section's data.
 func (h *menuHandler) updateSection(ctx *gin.Context) {
@@ -146,7 +148,6 @@ func (h *menuHandler) deleteSection(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "section deleted"})
 
 }
-
 
 // ---  Item  --- //
 func (h *menuHandler) listItems(ctx *gin.Context) {

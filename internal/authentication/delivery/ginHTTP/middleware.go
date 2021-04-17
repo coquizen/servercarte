@@ -21,7 +21,7 @@ func NewMiddleWare(authSvc authentication.Service) gin.HandlerFunc {
 
 //
 func (m *authenticationMiddleware) handle(ctx *gin.Context) {
-	claims, err := m.authSvc.ExtractClaims(ctx.Request)
+	tokenString, err := m.authSvc.ExtractToken(ctx.Request)
 	if err != nil {
 		if err == authentication.ErrInvalidAccessToken {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -30,6 +30,16 @@ func (m *authenticationMiddleware) handle(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	claims, err := m.authSvc.ParseTokenClaims(tokenString)
+	if err != nil {
+		if err == authentication.ErrInvalidAccessToken {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		} else if err == authentication.ErrExpiredToken {
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+ 	}
 	ctx.Set(authentication.CtxAuthenticationKey, claims)
 }
 

@@ -14,7 +14,7 @@ authentication:
   algorithm: HS256
   expiration_period: 4320
   minimum_key_length: 128
-  secret_key: YTJkNTZmNjhmNGU3YTk2N2U4MGQ3OWYzNTZhOWU4MWIyMTEzNjFjYjYwODViNmZk
+  secret_key: T1VPF9NO711OZFADZ2RVVWS2R42LLHEH
 security:
   length: 8
   mixed_case: false

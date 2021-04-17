@@ -16,7 +16,15 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/config"
 )
 
-// JWT is an authentication adapter
+var (
+	ErrMalformedToken = errors.New("token could not be parsed")
+	ErrNonExistentToken = errors.New("no token found in Authorization header")
+)
+
+var NullCustomClaims = authentication.CustomClaims{}
+
+
+// adapter is an authentication adapter
 type adapter struct {
 	secretKey        []byte
 	algorithm        jwt.SigningMethod
@@ -110,8 +118,8 @@ func (s *adapter) GenerateToken(_ context.Context, accountID uuid.UUID, username
 // 	})
 // }
 
-// ExtractRawToken extracts the token string from the request header
-func (s *adapter) ExtractRawToken(req *http.Request) (string, error) {
+// ExtractToken extracts the token string from the request header
+func (s *adapter) ExtractToken(req *http.Request) (string, error) {
 	authorizationHeader := req.Header.Get("Authorization")
 	if authorizationHeader != "" {
 		bearerToken := strings.Split(authorizationHeader, " ")
@@ -119,49 +127,27 @@ func (s *adapter) ExtractRawToken(req *http.Request) (string, error) {
 			return bearerToken[1], nil
 		}
 	}
-	return "", nil
+	return "", ErrNonExistentToken
 }
 
-// ExtractClaims extracts the claims as encoded in the token
-func (s *adapter) ExtractClaims(req *http.Request) (authentication.CustomClaims, error) {
-	tokenString, err := s.ExtractRawToken(req)
-	if err != nil {
-		return authentication.CustomClaims{}, err
-	}
-	token, err := s.verifyToken(tokenString)
-	if err != nil {
-		return authentication.CustomClaims{}, err
-	}
-	if err := s.TokenValid(tokenString); err != nil {
-		return authentication.CustomClaims{}, err	}
-	c := token.Claims.(*claims)
-	a := authentication.CustomClaims{AccountID: c.AccountID, Username: c.Username, Role: c.Role, Expiry: c.Expiry}
-	return a, nil
-}
-
-// TokenValid checks the token validity
-func (s *adapter) TokenValid(tokenString string) error {
-	token, err := s.verifyToken(tokenString)
-	if err != nil {
-		return err
-	}
-	if _, ok := token.Claims.(*claims); !ok && !token.Valid {
-		return err
-	}
-	return nil
-}
-
-// verifyToken verifies the token is the appropriate format and can be decoded
-func (s *adapter) verifyToken(tokenString string) (*jwt.Token, error) {
+// ParseTokenClaims extracts the claims as encoded in the token
+func (s *adapter) ParseTokenClaims(tokenString string) (authentication.CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &claims{}, func(token *jwt.Token) (interface{}, error) {
-		// Make sure that the token method conform to "SigningMethodHMAC"
 		if token.Method != s.algorithm {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return s.secretKey, nil
 	})
 	if err != nil {
-		return nil, err
+		return NullCustomClaims, ErrMalformedToken
 	}
-	return token, nil
+	c := token.Claims.(*claims)
+	if err := c.Valid(); err != nil {
+		return NullCustomClaims, err
+	}
+	return authentication.CustomClaims{
+		AccountID: c.AccountID,
+		Username: c.Username,
+		Role: c.Role,
+		Expiry: c.Expiry}, nil
 }
