@@ -1,8 +1,115 @@
-# gastro-backend
+# ServerCarte
+
+## What is ServerCarte?
+
+------------
+
+ServerCarte is the core backend for both GastroAdmin dashboard and Tribeca applications. Using this server, a restaurant owner can generate and edit content for the restaurant's menu. This insludes funcitonality for adding add on choices, condiments, and side order options to each menu item.
+
+## 3rd Party Libraries Used
+
+* [GORM](https://gorm.io) (an abstraction layer for multiple sql based databases) 
+* [dgrijalva/jwt-go](https://github.com/dgrijalva/jwt-go) (For JWT authentication)
+* [Gin-Gonic](https://gin-gonic.com) (Go Web Framework. A little bit overkill for this project's use case)
+
+## Architecture
+
+This project is based on the principles of [Clean Architecture](https://archive.org/details/CleanArchitecture). It consists of four layers (Enterprise Business Rules (entities), Application Business Rules, Application Interface, Frameworks & Drivers) implementing a separation of concerns between each layer. The following directory structure attempts to implment this in Go while maintaining Go's best practices in project organization:
+
+```
+├├── authentication
+├── cmd
+│   └── migration
+├── domain (entities)
+│   ├── account
+│   ├── menu
+│   ├── security
+│   └── user
+├── internal (framework & drivers)
+│   ├── account
+│   │   ├── delivery
+│   │   │   └── ginHTTP
+│   │   └── repository
+│   │       └── gorm
+│   ├── authentication
+│   │   ├── delivery
+│   │   │   └── ginHTTP
+│   │   └── framework
+│   │       └── jwt
+│   ├── config
+│   ├── delivery
+│   │   └── ginHTTP
+│   ├── helpers
+│   ├── logger
+│   ├── menu
+│   │   ├── delivery
+│   │   │   └── ginHTTP
+│   │   └── repository
+│   │       └── gorm
+│   ├── security
+│   │   └── bcrypto
+│   ├── store
+│   │   └── gormDB
+│   └── user
+│       ├── delivery
+│       │   └── ginHTTP
+│       └── repository
+│           └── gorm
+├── repository
+└── server
 
 
+```
+Throughout this project I used the following template for each entity: 
 
-To populate config.yml, set up a database that is supported by [GORM](https://gorm.io) (mysql/mariadb/postgres/sqlite3), and follow the following format:
+```
+entity
+├── model (consistings of structs)
+├── repository (interfaces for persistent storage)
+└── service (interfaces containing application logic)
+```
+
+In `/internal` the actual technology or framework is specified and implements interfaces as specified above. For further references, [zhashkevych/go-clean-architecture](https://github.com/zhashkevych/go-clean-architecture), [err0r500/go-realworld-clean](https://github.com/err0r500/go-realworld-clean).
+
+## API Documentation
+
+-------------
+
+This server provides the following endpoints
+```
+GET    /api/v1/menus       
+GET    /api/v1/sections    
+GET    /api/v1/sections/:id
+GET    /api/v1/items       
+GET    /api/v1/items/:id   
+POST   /api/v1/sections    
+PATCH  /api/v1/sections/:id
+DELETE /api/v1/sections/:id
+POST   /api/v1/items       
+PATCH  /api/v1/items/:id   
+DELETE /api/v1/items/:id   
+GET    /user/:id           
+PATCH  /user/:id           
+DELETE /user/:id           
+POST   /login              
+GET    /accounts           
+POST   /account            
+PATCH  /account            
+DELETE /account 
+```
+
+## Prerequisite
+
+* Latest version of `Go`
+* One of five databases (MySQL/ PostGreSQL, SQLite, SQLServer and Clickhouse)
+
+## Getting Started
+
+First need to specify the database that will act as persistent storage. Fortunately [GORM](https://gorm.io) provides a choice between MySQL/ PostGreSQL, SQLite, SQLServer and Clickhouse. Set up the preferred database with the appropriate user privileges and create a database. 
+
+This project also provides a choice in encryption technology to use for JWT as well as password policy settings.
+
+Populate `config.yml` and specify your configuration:
 
 ```yaml
 database:
