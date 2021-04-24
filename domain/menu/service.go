@@ -113,7 +113,6 @@ func (m *service) ReParentItem(ctx context.Context, item *Item, newSectionParent
 	if err := m.repo.FindSection(ctx, &newParentSection); err != nil {
 		return err
 	}
-
 	return m.repo.UpdateItemParent(ctx, item, &newParentSection)
 }
 
@@ -126,11 +125,7 @@ func (m *service) DeleteItem(ctx context.Context, rawID string) error {
 	if err != nil {
 		return err
 	}
-
 	var item Item
 	item.ID = id
-	if err := m.repo.FindItem(ctx, &item); err != nil {
-		return err
-	}
 	return m.repo.DeleteItem(ctx, &item)
 }

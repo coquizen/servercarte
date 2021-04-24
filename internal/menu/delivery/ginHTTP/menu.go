@@ -87,6 +87,7 @@ type newSectionRequest struct {
 	Visible     bool    `json:"visible"`
 	Type        int     `json:"type"`
 	ListOrder   uint    `json:"list_order"`
+	SectionID   *string `json:"section_id,omitempty"`
 }
 
 // createSection creates a new section.
@@ -105,6 +106,15 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 		Type:        menu.SectionType(reqSection.Type),
 		Visible:     reqSection.Visible,
 		ListOrder:   reqSection.ListOrder,
+	}
+
+	if reqSection.SectionID != nil {
+		requestSectionUUID, err := uuid.Parse(*reqSection.SectionID)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		section.SectionID = &requestSectionUUID
 	}
 	if err := h.menuSvc.NewSection(ctx, &section); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -161,13 +171,39 @@ func (h *menuHandler) listItems(ctx *gin.Context) {
 
 }
 
+type newItemRequest struct {
+	Title       string  `json:"title"`
+	Description *string `json:"description,omitempty"`
+	Active      bool    `json:"active"`
+	Type        int     `json:"type"`
+	ListOrder   uint    `json:"list_order"`
+	Price       uint64  `json:"visible"`
+	SectionID   string  `json:"section_id"`
+}
+
 // createSection creates a new section.
 func (h *menuHandler) createItem(ctx *gin.Context) {
-	var item menu.Item
+	var req newItemRequest
 
-	if err := ctx.ShouldBindJSON(&item); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	sectionUUID, err := uuid.Parse(req.SectionID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	item := menu.Item{
+
+		Title:       req.Title,
+		Description: req.Description,
+		Active:      req.Active,
+		Price:       req.Price,
+		Type:        menu.ItemType(req.Type),
+		ListOrder:   req.ListOrder,
+		SectionID:   &sectionUUID,
 	}
 
 	if err := h.menuSvc.NewItem(ctx, &item); err != nil {
