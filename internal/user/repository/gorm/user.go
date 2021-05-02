@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/CaninoDev/gastro/server/domain/user"
 	"github.com/CaninoDev/gastro/server/internal/logger"
@@ -20,6 +21,14 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{db}
 }
 
+func (r *userRepository) List(ctx context.Context) ([]user.User, error) {
+	var users []user.User
+
+	if err := r.db.Preload(clause.Associations).Find(&users).Error; err != nil {
+		return []user.User{}, err
+	}
+	return users, nil
+}
 func (r *userRepository) View(ctx context.Context, user *user.User) error {
 	if err := r.db.First(&user, user.ID).Error; errors.Is(
 		err,
@@ -46,7 +55,7 @@ func (r *userRepository) Search(ctx context.Context, user *user.User) error {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *user.User) error {
-	return r.db.Create(&user).Error
+	return r.db.Preload("User").Create(&user).Error
 }
 func (r *userRepository) Update(ctx context.Context, user *user.User) error {
 	return r.db.Model(&user).Updates(&user).Error

@@ -16,10 +16,10 @@ type User struct {
 	FirstName string `json:"first_name" gorm:"unique,not null"`
 	LastName  string `json:"last_name,omitempty" gorm:"unique,null"`
 	Address1  string `json:"address_1" gorm:"not null"`
-	Address2  string `json:"address_2,omitempty" gorm:"null"`
+	Address2  *string `json:"address_2,omitempty" gorm:"null"`
 	ZipCode   uint   `json:"zip_code" gorm:"not null"`
 	Email     string `json:"email" gorm:"unique,not null"`
-	TelephoneNumber string `json:"phone" gorm:"not null"`
+	TelephoneNumber string `json:"phone,omitempty" gorm:"null"`
 }
 
 func (u *User) Validate() error {
@@ -38,12 +38,15 @@ func (u *User) Validate() error {
 	if u.Address1 == "" {
 		return errors.New("address1 is empty")
 	}
-	if len([]rune(strconv.Itoa(int(u.ZipCode)))) != 5 || len([]rune(strconv.Itoa(int(u.ZipCode)))) != 9 {
+	if !(len([]rune(strconv.Itoa(int(u.ZipCode)))) == 5 || len([]rune(strconv.Itoa(int(u.ZipCode)))) == 9)  {
 		return errors.New("invalid zip code")
 	}
-	if ok, _ := regexp.Match(phoneRegExp, []byte(u.TelephoneNumber)); !ok {
+	if len([]rune(u.TelephoneNumber)) > 0 {
+		if ok, _ := regexp.Match(phoneRegExp, []byte(u.TelephoneNumber)); !ok {
 		return errors.New("not a valid telephone number")
 	}
+	}
+
 	return nil
 }
 

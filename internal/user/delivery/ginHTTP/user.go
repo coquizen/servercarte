@@ -21,6 +21,16 @@ func RegisterRoutes(svc user.Service, r *gin.Engine) {
 	userGroup.GET("/:id", h.view)
 	userGroup.PATCH("/:id", h.update)
 	userGroup.DELETE("/:id", h.delete)
+	r.GET("/users", h.list)
+}
+
+func (h *userHandler) list(ctx *gin.Context) {
+	users, err := h.svc.Users(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": users})
 }
 
 // TODO: use the jwt token to unwrap claims of the currently logged in user
@@ -40,11 +50,11 @@ func (h *userHandler) view(ctx *gin.Context) {
 }
 
 type updateRequest struct {
-	Address1 *string `json:"address_1,omitempty"`
-	Address2 *string `json:"address_2,omitempty"`
-	ZipCode *uint `json:"zip_code,omitempty"`
+	Address1        *string `json:"address_1,omitempty"`
+	Address2        *string `json:"address_2,omitempty"`
+	ZipCode         *uint   `json:"zip_code,omitempty"`
 	TelephoneNumber *string `json:"telephone_number,omitempty"`
-	Email *string `json:"email,omitempty"`
+	Email           *string `json:"email,omitempty"`
 }
 
 func (h userHandler) update(ctx *gin.Context) {
@@ -59,10 +69,10 @@ func (h userHandler) update(ctx *gin.Context) {
 	}
 	var updateUser user.User
 	if req.Address1 != nil {
-		updateUser.Address1  = *req.Address1
+		updateUser.Address1 = *req.Address1
 	}
 	if req.Address2 != nil {
-		updateUser.Address2  = *req.Address2
+		updateUser.Address2 = req.Address2
 	}
 	if req.ZipCode != nil {
 		updateUser.ZipCode = *req.ZipCode

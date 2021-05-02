@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-
 // Service represents the user application interface
 type Service interface {
-	New(context.Context, *User) error
+	Create(context.Context, *User) error
+	Users(context.Context) ([]User, error)
 	View(context.Context, uuid.UUID) (*User, error)
 	Find(context.Context, *User) error
 	Update(context.Context, *User) error
@@ -29,11 +29,16 @@ func NewService(userRepo Repository) *service {
 }
 
 // New creates a new user. This user can be either a restaurant guest, employee, or manager/owner.
-func (u *service) New(ctx context.Context, user *User) error {
+func (u *service) Create(ctx context.Context, user *User) error {
 	if err := user.Validate(); err != nil {
 		return err
 	}
 	return u.repo.Create(ctx, user)
+}
+
+// Users returns all the users currently in the system
+func (u *service) Users(ctx context.Context) ([]User, error) {
+	return u.repo.List(ctx)
 }
 
 // View returns record found by the record's ID

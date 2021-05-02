@@ -90,6 +90,16 @@ type newSectionRequest struct {
 	SectionID   *string `json:"section_id,omitempty"`
 }
 
+type updateSectionRequest struct {
+	ID          *string `json:"id,omitempty"`
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Active      *bool   `json:"active,omitempty"`
+	Visible     *bool   `json:"visible,omitempty"`
+	Type        *int    `json:"type,omitempty"`
+	ListOrder   *uint   `json:"list_order,omitempty"`
+}
+
 // createSection creates a new section.
 func (h *menuHandler) createSection(ctx *gin.Context) {
 	var reqSection newSectionRequest
@@ -126,9 +136,9 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 
 // updateSection update section's data.
 func (h *menuHandler) updateSection(ctx *gin.Context) {
-	var section menu.Section
+	var updatedSection updateSectionRequest
 
-	if err := ctx.ShouldBindJSON(&section); err != nil {
+	if err := ctx.ShouldBindJSON(&updatedSection); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -140,6 +150,13 @@ func (h *menuHandler) updateSection(ctx *gin.Context) {
 		return
 	}
 
+	var section = menu.Section{
+		Title:       *updatedSection.Title,
+		Description: updatedSection.Description,
+		Active:      *updatedSection.Active,
+		Visible:     *updatedSection.Visible,
+		ListOrder:   *updatedSection.ListOrder,
+	}
 	section.ID = id
 	if err := h.menuSvc.UpdateSectionContent(ctx, &section); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -179,6 +196,16 @@ type newItemRequest struct {
 	ListOrder   uint    `json:"list_order"`
 	Price       uint64  `json:"visible"`
 	SectionID   string  `json:"section_id"`
+}
+
+type updateItemRequest struct {
+	ID          *string `json:"id,omitempty"`
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Active      *bool   `json:"active,omitempty"`
+	Type        *int    `json:"type,omitempty"`
+	ListOrder   *uint   `json:"list_order,omitempty"`
+	Price       *uint64 `json:"visible,omitempty"`
 }
 
 // createSection creates a new section.
@@ -222,14 +249,22 @@ func (h *menuHandler) updateItem(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	var item menu.Item
-
-	if err := ctx.ShouldBindJSON(&item); err != nil {
+	var updatedItem updateItemRequest
+	if err := ctx.ShouldBindJSON(&updatedItem); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	var item = menu.Item{
+		Title:       *updatedItem.Title,
+		Description: updatedItem.Description,
+		Active:      *updatedItem.Active,
+		Type:        menu.ItemType(*updatedItem.Type),
+		ListOrder:   *updatedItem.ListOrder,
+		Price:       *updatedItem.Price,
+	}
 	item.ID = id
+
 	if err := h.menuSvc.UpdateItemContent(ctx, &item); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -1,6 +1,7 @@
 package ginHTTP
 
 import (
+	"github.com/CaninoDev/gastro/server/domain/user"
 	"net/http"
 
 	"github.com/CaninoDev/gastro/server/authentication"
@@ -15,6 +16,10 @@ import (
 type accountHandler struct {
 	authSvc    authentication.Service
 	accountSvc account.Service
+}
+
+type accountRequest struct {
+	Username string `json:"username"`
 }
 
 // RegisterRoutes sets up account API endpoint using Gin.
@@ -34,9 +39,11 @@ func privateRoutes(handler accountHandler, router *gin.Engine, authMiddleWare gi
 	routerGroup.GET("", handler.list)
 
 	anotherRouterGroup := router.Group("/account", authMiddleWare, authorizationMiddleware)
+	anotherRouterGroup.GET("", handler.view)
 	anotherRouterGroup.POST("", handler.create)
 	anotherRouterGroup.PATCH("", handler.update)
 	anotherRouterGroup.DELETE("", handler.delete)
+
 }
 
 func (h *accountHandler) create(ctx *gin.Context) {
@@ -48,10 +55,14 @@ func (h *accountHandler) create(ctx *gin.Context) {
 
 	createdAccount, err := h.accountSvc.New(ctx, newAccount)
 	if err != nil {
+		if err == user.ErrUserAlreadyExists {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
-	ctx.JSON(http.StatusOK, createdAccount)
+	ctx.JSON(http.StatusOK, gin.H{"data": createdAccount})
 }
 
 type credentials struct {
@@ -93,6 +104,22 @@ func (h *accountHandler) list(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": accounts})
+}
+
+func (h *accountHandler) view(ctx *gin.Context) {
+	var accountReq accountRequest
+	if err := ctx.ShouldBindJSON(&accountReq); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error})
+		return
+	}
+
+	foundAccount, err := h.accountSvc.Find(ctx, accountReq.Username)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"data": foundAccount})
 }
 
 func (h *accountHandler) update(ctx *gin.Context) {

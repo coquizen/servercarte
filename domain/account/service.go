@@ -23,7 +23,7 @@ var (
 // Service describes the expected behavior in creating accounts and establishing roles for users for the purposes of
 // ACL and RBAC
 type Service interface {
-	New(ctx context.Context, newAccountDetails NewAccountRequest) (Account, error)
+	New(ctx context.Context, newAccountDetails NewAccountRequest) (*Account, error)
 	Accounts(ctx context.Context) ([]Account, error)
 	Update(ctx context.Context, request UpdateAccountRequest) error
 	Find(ctx context.Context, username string) (Account, error)
@@ -48,25 +48,34 @@ func NewService(accountRepo Repository, userSvc user.Service, secSvc security.Se
 // New creates a new account (bringing in the user model).
 // Each user will have zero (restaurant guest) to 1 (
 // restaurant employee). This domain is primarily managed by the restaurant's manager
-func (a *service) New(ctx context.Context, req NewAccountRequest) (Account, error) {
+func (a *service) New(ctx context.Context, req NewAccountRequest) (*Account, error) {
 	newAccount, newUser := req.unwrap()
-	if err := a.validateAccountRequest(req, newUser); err != nil {
-		return NullAccount, err
+	if err := a.validateAccountRequest(req, &newUser); err != nil {
+		return &NullAccount, err
 	}
 
-	if err := a.checkPreexisting(ctx, newUser, newAccount.Username); err != nil {
-		return NullAccount, err
+	if err := a.checkPreexisting(ctx, &newUser, newAccount.Username); err != nil {
+		return &NullAccount, ErrUsernameInUse
 	}
 
-	if err := a.userSvc.New(ctx, newUser); err != nil {
-		return NullAccount, err
+	if err := a.secSvc.IsValid(req.Password); err != nil {
+		return &NullAccount, err
 	}
 
-	newAccount.User = *newUser
-	if err := a.accountRepo.Create(ctx, newAccount); err != nil {
-		return NullAccount, err
+	if err := a.secSvc.ConfirmationChecker(req.Password, req.PasswordConfirm); err != nil {
+		return &NullAccount, err
 	}
-	return *newAccount, nil
+
+	newAccount.Password = a.secSvc.Hash(req.Password)
+
+	if err := a.userSvc.Create(ctx, &newUser); err != nil {
+		return &NullAccount, err
+	}
+
+	if err := a.accountRepo.Create(ctx, &newAccount, &newUser); err != nil {
+		return &NullAccount, err
+	}
+	return &newAccount, nil
 }
 
 func (a *service) validateAccountRequest(req NewAccountRequest, newUser *user.User) error {
@@ -102,12 +111,11 @@ func (a *service) Accounts(ctx context.Context) ([]Account, error) {
 }
 
 func (a *service) Find(ctx context.Context, username string) (Account, error) {
-	var acct Account
-	acct.Username = username
-	if err := a.accountRepo.Find(ctx, &acct); err != nil {
+	account, err := a.accountRepo.Find(ctx, username)
+	if err != nil {
 		return NullAccount, err
 	}
-	return acct, nil
+	return account, nil
 }
 
 func (a *service) ChangePassword(ctx context.Context, username, oldPassword, newPassword, confirmNewPassword string) error {

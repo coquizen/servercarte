@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 
+	"github.com/CaninoDev/gastro/server/domain/user"
 	"github.com/google/uuid"
 )
 
@@ -10,8 +11,8 @@ import (
 // account information.
 type Repository interface {
 	List(ctx context.Context) ([]Account, error)
-	Create(ctx context.Context, account *Account) error
-	Find(ctx context.Context, account *Account) error
+	Create(ctx context.Context, account *Account, user *user.User) error
+	Find(ctx context.Context, username string) (Account, error)
 	Update(ctx context.Context, account *Account) error
 	Delete(ctx context.Context, accountID uuid.UUID) error
 }

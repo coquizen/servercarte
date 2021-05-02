@@ -9,7 +9,6 @@ import (
 	"github.com/CaninoDev/gastro/server/domain/user"
 )
 
-
 type AccessLevel int
 
 const (
@@ -32,32 +31,32 @@ type Account struct {
 
 // NewAccountRequest represent the request struct for Create endpoint
 type NewAccountRequest struct {
-	FirstName       string      `json:"first_name"`
-	LastName        string      `json:"last_name"`
-	Address1        string      `json:"address_1"`
-	Address2        *string     `json:"address_2,omitempty"`
-	ZipCode         uint        `json:"zip_code"`
-	Username        string      `json:"username"`
-	Password        string      `json:"password"`
-	Role            AccessLevel `json:"role"`
-	PasswordConfirm string      `json:"password_confirm"`
-	Email           string      `json:"email"`
+	FirstName       string  `json:"first_name"`
+	LastName        string  `json:"last_name"`
+	Address1        string  `json:"address_1"`
+	Address2        *string `json:"address_2,omitempty"`
+	ZipCode         uint    `json:"zip_code"`
+	Username        string  `json:"username"`
+	Password        string  `json:"password"`
+	Role            int     `json:"role"`
+	PasswordConfirm string  `json:"password_confirm"`
+	Email           string  `json:"email"`
 }
 
-func (n *NewAccountRequest) unwrap() (*Account, *user.User) {
+func (n *NewAccountRequest) unwrap() (Account, user.User) {
 	var newAccount Account
 	var newUser user.User
 
 	newUser.FirstName = n.FirstName
 	newUser.LastName = n.LastName
 	newUser.Address1 = n.Address1
-	newUser.Address2 = *n.Address2
+	newUser.Address2 = n.Address2
 	newUser.ZipCode = n.ZipCode
 	newUser.Email = n.Email
 
 	newAccount.Username = n.Username
-	newAccount.Role = n.Role
-	return &newAccount, &newUser
+	newAccount.Role = AccessLevel(n.Role)
+	return newAccount, newUser
 }
 
 // UpdateAccountRequest represent the request struct for Update endpoint
@@ -78,11 +77,9 @@ func (n *UpdateAccountRequest) unwrap() (*Account, *user.User) {
 	updatingAccount.Role = *n.Role
 
 	updatingUser.Address1 = *n.Address1
-	updatingUser.Address2 = *n.Address2
+	updatingUser.Address2 = n.Address2
 	updatingUser.ZipCode = *n.ZipCode
 	updatingUser.Email = *n.Email
 
 	return &updatingAccount, &updatingUser
 }
-
-
