@@ -4,7 +4,7 @@
 
 ------------
 
-ServerCarte is the core backend for both GastroAdmin dashboard and Tribeca applications. Using this server, a restaurant owner can generate and edit content for the restaurant's menu. This insludes funcitonality for adding add on choices, condiments, and side order options to each menu item.
+ServerCarte is the core backend for both GastroAdmin dashboard and Tribeca application. Using this server, a restaurant owner can generate and edit content for the restaurant's menu. This includes funcitonality for adding add on choices, condiments, and side order options to each menu item.
 
 ## 3rd Party Libraries Used
 
@@ -14,17 +14,25 @@ ServerCarte is the core backend for both GastroAdmin dashboard and Tribeca appli
 
 ## Architecture
 
-This project is based on the principles of [Clean Architecture](https://archive.org/details/CleanArchitecture). It consists of four layers (Enterprise Business Rules (entities), Application Business Rules, Application Interface, Frameworks & Drivers) implementing a separation of concerns between each layer. The following directory structure attempts to implment this in Go while maintaining Go's best practices in project organization:
+This project is based on the principles of [Clean Architecture](https://archive.org/details/CleanArchitecture). It consists of four layers (Domains/Entities, Application Business Rules, Application Interface, Frameworks & Drivers) implementing a separation of concerns between each layer. The following directory structure is should demonstrate this architecture:
 
 ```
-├├── authentication
 ├── cmd
 │   └── migration
 ├── domain (entities)
 │   ├── account
+|   |   ├── service.go
+|   |   ├── model.go
+|   |   └── repo.go
 │   ├── menu
+|   |   ├── service.go
+|   |   ├── model.go
+|   |   └── repo.go
 │   ├── security
 │   └── user
+|   |   ├── service.go
+|   |   ├── model.go
+|   |   └── repo.go
 ├── internal (framework & drivers)
 │   ├── account
 │   │   ├── delivery
@@ -55,7 +63,6 @@ This project is based on the principles of [Clean Architecture](https://archive.
 │       │   └── ginHTTP
 │       └── repository
 │           └── gorm
-├── repository
 └── server
 
 
