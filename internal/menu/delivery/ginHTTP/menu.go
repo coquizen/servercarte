@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/authentication"
+	"github.com/CaninoDev/gastro/server/domain/authentication"
 	"github.com/CaninoDev/gastro/server/domain/menu"
 )
 
@@ -85,7 +85,7 @@ type newSectionRequest struct {
 	Description *string `json:"description,omitempty"`
 	Active      bool    `json:"active"`
 	Visible     bool    `json:"visible"`
-	Type        int     `json:"type"`
+	Type        menu.SectionType     `json:"type"`
 	ListOrder   uint    `json:"list_order"`
 	SectionID   *string `json:"section_id,omitempty"`
 }
@@ -96,7 +96,7 @@ type updateSectionRequest struct {
 	Description *string `json:"description,omitempty"`
 	Active      *bool   `json:"active,omitempty"`
 	Visible     *bool   `json:"visible,omitempty"`
-	Type        *int    `json:"type,omitempty"`
+	Type        *menu.SectionType    `json:"type,omitempty"`
 	ListOrder   *uint   `json:"list_order,omitempty"`
 }
 
@@ -113,7 +113,7 @@ func (h *menuHandler) createSection(ctx *gin.Context) {
 		Title:       reqSection.Title,
 		Description: reqSection.Description,
 		Active:      reqSection.Active,
-		Type:        menu.SectionType(reqSection.Type),
+		Type:        reqSection.Type,
 		Visible:     reqSection.Visible,
 		ListOrder:   reqSection.ListOrder,
 	}
@@ -155,6 +155,7 @@ func (h *menuHandler) updateSection(ctx *gin.Context) {
 		Description: updatedSection.Description,
 		Active:      *updatedSection.Active,
 		Visible:     *updatedSection.Visible,
+		Type:		 *updatedSection.Type,
 		ListOrder:   *updatedSection.ListOrder,
 	}
 	section.ID = id
@@ -192,7 +193,7 @@ type newItemRequest struct {
 	Title       string  `json:"title"`
 	Description *string `json:"description,omitempty"`
 	Active      bool    `json:"active"`
-	Type        int     `json:"type"`
+	Type        menu.ItemType     `json:"type"`
 	ListOrder   uint    `json:"list_order"`
 	Price       uint64  `json:"visible"`
 	SectionID   string  `json:"section_id"`
@@ -203,7 +204,7 @@ type updateItemRequest struct {
 	Title       *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Active      *bool   `json:"active,omitempty"`
-	Type        *int    `json:"type,omitempty"`
+	Type        *menu.ItemType   `json:"type,omitempty"`
 	ListOrder   *uint   `json:"list_order,omitempty"`
 	Price       *uint64 `json:"visible,omitempty"`
 }
@@ -228,7 +229,7 @@ func (h *menuHandler) createItem(ctx *gin.Context) {
 		Description: req.Description,
 		Active:      req.Active,
 		Price:       req.Price,
-		Type:        menu.ItemType(req.Type),
+		Type:        req.Type,
 		ListOrder:   req.ListOrder,
 		SectionID:   &sectionUUID,
 	}
@@ -259,7 +260,7 @@ func (h *menuHandler) updateItem(ctx *gin.Context) {
 		Title:       *updatedItem.Title,
 		Description: updatedItem.Description,
 		Active:      *updatedItem.Active,
-		Type:        menu.ItemType(*updatedItem.Type),
+		Type:        *updatedItem.Type,
 		ListOrder:   *updatedItem.ListOrder,
 		Price:       *updatedItem.Price,
 	}

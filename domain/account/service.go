@@ -8,7 +8,7 @@ import (
 	"github.com/CaninoDev/gastro/server/domain/security"
 	"github.com/CaninoDev/gastro/server/internal/helpers"
 
-	"github.com/CaninoDev/gastro/server/authentication"
+	"github.com/CaninoDev/gastro/server/domain/authentication"
 	"github.com/CaninoDev/gastro/server/domain/user"
 	"github.com/google/uuid"
 )

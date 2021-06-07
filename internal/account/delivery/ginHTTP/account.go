@@ -4,7 +4,7 @@ import (
 	"github.com/CaninoDev/gastro/server/domain/user"
 	"net/http"
 
-	"github.com/CaninoDev/gastro/server/authentication"
+	"github.com/CaninoDev/gastro/server/domain/authentication"
 
 	"github.com/google/uuid"
 

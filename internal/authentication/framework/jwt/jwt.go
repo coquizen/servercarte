@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CaninoDev/gastro/server/authentication"
+	"github.com/CaninoDev/gastro/server/domain/authentication"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"

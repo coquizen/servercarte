@@ -31,7 +31,6 @@ func NewMenuRepository(db *gorm.DB) *menuRepository {
 func (r *menuRepository) ListMenus(_ context.Context,) (*[]menu.Section, error) {
 	var sections []menu.Section
 
-
 	if err := r.db.Preload("Items").Preload("SubSections.Items").Preload(clause.Associations).Where(
 		"type = ?",
 		menu.Meal).Find(&sections).Error; err != nil {

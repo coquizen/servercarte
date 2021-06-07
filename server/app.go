@@ -13,8 +13,8 @@ import (
 	"github.com/CaninoDev/gastro/server/internal/security/bcrypto"
 	"github.com/CaninoDev/gastro/server/internal/store/gormDB"
 
-	"github.com/CaninoDev/gastro/server/authentication"
 	"github.com/CaninoDev/gastro/server/domain/account"
+	"github.com/CaninoDev/gastro/server/domain/authentication"
 	"github.com/CaninoDev/gastro/server/domain/menu"
 	"github.com/CaninoDev/gastro/server/domain/user"
 	accountTransport "github.com/CaninoDev/gastro/server/internal/account/delivery/ginHTTP"
