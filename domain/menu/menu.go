@@ -3,6 +3,7 @@ package menu
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -27,6 +28,85 @@ func (s *SectionType) UnmarshalText(text []byte) error {
 	*s = SectionTypeFromText(string(text))
 	return nil
 }
+type Period struct {
+	Start uint
+	End uint
+}
+
+type Schedule map[time.Weekday]Period
+
+type Menu struct {
+	ID          uuid.UUID
+	title       string
+	description string
+	sections []uuid.UUID
+	foodItems []uuid.UUID
+	schedule Schedule
+ 	isActive bool
+}
+
+type CategorySection struct {
+	ID uuid.UUID
+	title       string
+	description string
+	menu        uuid.UUID
+	items       []uuid.UUID
+}
+
+type FoodItem struct {
+	ID uuid.UUID
+	title string
+	description string
+	price uint
+	parentSection uuid.UUID
+	isActive bool
+}
+
+func NewMenu(title, description string, isActive bool, schedule Schedule) (*Menu, error) {
+	if title == "" {
+		return &Menu{}, errors.New("empty title string")
+	}
+
+	return &Menu{
+		ID: uuid.New(),
+		title: title,
+		description: description,
+		sections: []uuid.UUID{},
+		foodItems: []uuid.UUID{},
+		schedule: schedule,
+		isActive: isActive,
+	}, nil
+}
+
+func NewCategorySection(title, description string, menu uuid.UUID) (*CategorySection, error) {
+	if title == "" {
+		return &CategorySection{}, errors.New("empty title string")
+	}
+
+	return &CategorySection{
+		ID:          uuid.New(),
+		title:       title,
+		description: description,
+		menu:        menu,
+		items:       []uuid.UUID{},
+	}, nil
+}
+
+func NewFoodItem(title, description string, price uint, parentSection uuid.UUID, isActive bool) (*FoodItem, error) {
+	if title == "" {
+		return &FoodItem{}, errors.New("empty title string")
+	}
+
+	return &FoodItem{
+		ID:            uuid.New(),
+		title:         title,
+		description:   description,
+		price:         price,
+		parentSection: parentSection,
+		isActive:      isActive,
+	}, nil
+}
+
 
 // Section struct defines the service structure.
 type Section struct {
@@ -69,10 +149,8 @@ const (
 	Snack
 	Side
 	AddOn
-
 	Condiment
 )
-
 func (i ItemType) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
@@ -118,6 +196,7 @@ func SectionTypeFromText(text string) SectionType {
 		return UndefinedSection
 	}
 }
+
 func ItemTypeFromText(text string) ItemType {
 	switch strings.ToLower(text) {
 	case "plate":
