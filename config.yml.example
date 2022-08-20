@@ -1,9 +1,12 @@
+# vim: filetype=yaml
+# @format
+
 database:
-  type: mysql
+  type: mysql | postgres | sqlite3
   host: localhost
   port: 3306
-  user: caninodev
-  pass: mindgames
+  user: 
+  pass: 
   name: tribeca
 server:
   host: 127.0.0.1
