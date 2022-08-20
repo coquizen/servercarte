@@ -164,7 +164,7 @@ security:
   OPTIONS
   -c <config.yml>
     Specify the configuration file for database. server, and authentication setup
-  -p 
+  -s
     Prepopulate the database with sample data
   ```
   
