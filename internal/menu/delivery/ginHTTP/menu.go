@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/domain/authentication"
-	"github.com/CaninoDev/gastro/server/domain/menu"
+	"github.com/coquizen/servercarte/domain/authentication"
+	"github.com/coquizen/servercarte/domain/menu"
 )
 
 type menuHandler struct {

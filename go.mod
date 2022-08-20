@@ -1,4 +1,4 @@
-module github.com/CaninoDev/gastro/server
+module github.com/coquizen/servercarte
 
 go 1.16
 

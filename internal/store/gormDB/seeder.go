@@ -2,14 +2,14 @@ package gormDB
 
 import (
 	"fmt"
-	"github.com/CaninoDev/gastro/server/domain/account"
-	"github.com/CaninoDev/gastro/server/domain/menu"
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/account"
+	"github.com/coquizen/servercarte/domain/menu"
+	"github.com/coquizen/servercarte/domain/user"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	"github.com/CaninoDev/gastro/server/internal/logger"
+	"github.com/coquizen/servercarte/internal/logger"
 )
 
 func StrPtr(s string) *string {

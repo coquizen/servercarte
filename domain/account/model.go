@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/domain"
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain"
+	"github.com/coquizen/servercarte/domain/user"
 )
 
 type AccessLevel int

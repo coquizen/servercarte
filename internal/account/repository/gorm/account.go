@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/domain/account"
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/account"
+	"github.com/coquizen/servercarte/domain/user"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

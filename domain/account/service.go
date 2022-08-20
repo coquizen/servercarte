@@ -5,11 +5,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/CaninoDev/gastro/server/domain/security"
-	"github.com/CaninoDev/gastro/server/internal/helpers"
+	"github.com/coquizen/servercarte/domain/security"
+	"github.com/coquizen/servercarte/internal/helpers"
 
-	"github.com/CaninoDev/gastro/server/domain/authentication"
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/authentication"
+	"github.com/coquizen/servercarte/domain/user"
 	"github.com/google/uuid"
 )
 

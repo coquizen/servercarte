@@ -9,8 +9,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"github.com/CaninoDev/gastro/server/domain/menu"
-	"github.com/CaninoDev/gastro/server/internal/logger"
+	"github.com/coquizen/servercarte/domain/menu"
+	"github.com/coquizen/servercarte/internal/logger"
 )
 
 var (

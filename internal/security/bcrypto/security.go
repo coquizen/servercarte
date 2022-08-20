@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/helpers"
+	"github.com/coquizen/servercarte/internal/config"
+	"github.com/coquizen/servercarte/internal/helpers"
 )
 
 var ErrPasswordsDoNotMatch = errors.New("passwords do not match")

@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/CaninoDev/gastro/server/domain/authentication"
+	"github.com/coquizen/servercarte/domain/authentication"
 )
 
 type authenticationMiddleware struct {

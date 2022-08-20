@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/CaninoDev/gastro/server/domain"
+	"github.com/coquizen/servercarte/domain"
 )
 
 var phoneRegExp = "(?:^|[^0-9])(1[34578][0-9]{9})(?:$|[^0-9])"

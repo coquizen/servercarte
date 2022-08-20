@@ -1,16 +1,16 @@
 package ginHTTP
 
 import (
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/user"
 	"net/http"
 
-	"github.com/CaninoDev/gastro/server/domain/authentication"
+	"github.com/coquizen/servercarte/domain/authentication"
 
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/CaninoDev/gastro/server/domain/account"
+	"github.com/coquizen/servercarte/domain/account"
 )
 
 type accountHandler struct {

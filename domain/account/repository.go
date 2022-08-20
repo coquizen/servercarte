@@ -3,7 +3,7 @@ package account
 import (
 	"context"
 
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/user"
 	"github.com/google/uuid"
 )
 

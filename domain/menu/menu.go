@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/domain"
+	"github.com/coquizen/servercarte/domain"
 )
 
 //go:generate stringer -type=SectionType

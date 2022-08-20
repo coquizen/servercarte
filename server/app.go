@@ -4,26 +4,26 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/CaninoDev/gastro/server/domain/security"
+	"github.com/coquizen/servercarte/domain/security"
 
-	"github.com/CaninoDev/gastro/server/internal/delivery/ginHTTP"
+	"github.com/coquizen/servercarte/internal/delivery/ginHTTP"
 
-	"github.com/CaninoDev/gastro/server/internal/authentication/framework/jwt"
-	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/security/bcrypto"
-	"github.com/CaninoDev/gastro/server/internal/store/gormDB"
+	"github.com/coquizen/servercarte/internal/authentication/framework/jwt"
+	"github.com/coquizen/servercarte/internal/config"
+	"github.com/coquizen/servercarte/internal/security/bcrypto"
+	"github.com/coquizen/servercarte/internal/store/gormDB"
 
-	"github.com/CaninoDev/gastro/server/domain/account"
-	"github.com/CaninoDev/gastro/server/domain/authentication"
-	"github.com/CaninoDev/gastro/server/domain/menu"
-	"github.com/CaninoDev/gastro/server/domain/user"
-	accountTransport "github.com/CaninoDev/gastro/server/internal/account/delivery/ginHTTP"
-	accountRepo "github.com/CaninoDev/gastro/server/internal/account/repository/gorm"
-	authHTTP "github.com/CaninoDev/gastro/server/internal/authentication/delivery/ginHTTP"
-	menuTransport "github.com/CaninoDev/gastro/server/internal/menu/delivery/ginHTTP"
-	menuRepo "github.com/CaninoDev/gastro/server/internal/menu/repository/gorm"
-	userTransport "github.com/CaninoDev/gastro/server/internal/user/delivery/ginHTTP"
-	userRepo "github.com/CaninoDev/gastro/server/internal/user/repository/gorm"
+	"github.com/coquizen/servercarte/domain/account"
+	"github.com/coquizen/servercarte/domain/authentication"
+	"github.com/coquizen/servercarte/domain/menu"
+	"github.com/coquizen/servercarte/domain/user"
+	accountTransport "github.com/coquizen/servercarte/internal/account/delivery/ginHTTP"
+	accountRepo "github.com/coquizen/servercarte/internal/account/repository/gorm"
+	authHTTP "github.com/coquizen/servercarte/internal/authentication/delivery/ginHTTP"
+	menuTransport "github.com/coquizen/servercarte/internal/menu/delivery/ginHTTP"
+	menuRepo "github.com/coquizen/servercarte/internal/menu/repository/gorm"
+	userTransport "github.com/coquizen/servercarte/internal/user/delivery/ginHTTP"
+	userRepo "github.com/coquizen/servercarte/internal/user/repository/gorm"
 )
 
 // App struct represents this application

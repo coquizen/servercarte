@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/user"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

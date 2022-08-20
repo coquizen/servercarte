@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/internal/logger"
+	"github.com/coquizen/servercarte/internal/config"
+	"github.com/coquizen/servercarte/internal/logger"
 )
 
 // NewServer starts a new ginHTTP server with Gin acting as the handler for routes

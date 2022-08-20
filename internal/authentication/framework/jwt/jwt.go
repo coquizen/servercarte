@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CaninoDev/gastro/server/domain/authentication"
+	"github.com/coquizen/servercarte/domain/authentication"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 
-	"github.com/CaninoDev/gastro/server/internal/config"
+	"github.com/coquizen/servercarte/internal/config"
 )
 
 var (

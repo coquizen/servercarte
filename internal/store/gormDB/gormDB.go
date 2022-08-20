@@ -14,7 +14,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/CaninoDev/gastro/server/internal/config"
+	"github.com/coquizen/servercarte/internal/config"
 )
 
 // Start returns a configured instance of database{}

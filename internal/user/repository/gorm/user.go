@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"github.com/CaninoDev/gastro/server/domain/user"
-	"github.com/CaninoDev/gastro/server/internal/logger"
+	"github.com/coquizen/servercarte/domain/user"
+	"github.com/coquizen/servercarte/internal/logger"
 )
 
 // userRepository provides persistent repository for user

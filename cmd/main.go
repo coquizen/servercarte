@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/CaninoDev/gastro/server/internal/config"
-	"github.com/CaninoDev/gastro/server/server"
+	"github.com/coquizen/servercarte/internal/config"
+	"github.com/coquizen/servercarte/server"
 	"log"
 )
 

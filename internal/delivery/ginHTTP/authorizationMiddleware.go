@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/CaninoDev/gastro/server/domain/account"
-	"github.com/CaninoDev/gastro/server/domain/authentication"
+	"github.com/coquizen/servercarte/domain/account"
+	"github.com/coquizen/servercarte/domain/authentication"
 )
 
 func AuthorizationMiddleware(accessLevel account.AccessLevel) gin.HandlerFunc {

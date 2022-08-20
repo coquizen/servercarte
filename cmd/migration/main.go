@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CaninoDev/gastro/server/domain/account"
-	"github.com/CaninoDev/gastro/server/domain/menu"
-	"github.com/CaninoDev/gastro/server/domain/user"
+	"github.com/coquizen/servercarte/domain/account"
+	"github.com/coquizen/servercarte/domain/menu"
+	"github.com/coquizen/servercarte/domain/user"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -18,7 +18,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/CaninoDev/gastro/server/internal/config"
+	"github.com/coquizen/servercarte/internal/config"
 )
 
 var configYAML   = flag.String("c", "config.yml", "configure db")
