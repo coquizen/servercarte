@@ -84,22 +84,30 @@ In `/internal` the actual technology or framework is specified and implements in
 
 This server provides the following endpoints
 ```
-GET    /api/v1/menus       
-GET    /api/v1/sections    
-GET    /api/v1/sections/:id
-GET    /api/v1/items       
-GET    /api/v1/items/:id   
-POST   /api/v1/sections    
+GET    /api/v1/menus
+
+GET    /api/v1/sections
+POST   /api/v1/sections
+
+GET    /api/v1/sections/:id    
 PATCH  /api/v1/sections/:id
 DELETE /api/v1/sections/:id
-POST   /api/v1/items       
+
+GET    /api/v1/items 
+POST   /api/v1/items
+
+GET    /api/v1/items/:id   
 PATCH  /api/v1/items/:id   
 DELETE /api/v1/items/:id   
+
 GET    /user/:id           
 PATCH  /user/:id           
 DELETE /user/:id           
+
 POST   /login              
-GET    /accounts           
+
+GET    /accounts
+
 POST   /account            
 PATCH  /account            
 DELETE /account 
@@ -147,5 +155,14 @@ security:
   _Hint: to generate a secret key run_
   `$ date +%s | sha256sum | base64 | head -c 64 ; echo`
   
-  then 
-  `$ go run cmd/main.go -c config.yml -p`
+  _To run a development version of the backend_
+  ```go    
+  go run ./cmd/main.go [OPTIONS]
+  
+  OPTIONS
+  -c <config.yml>
+    Specify the configuration file for database. server, and authentication setup
+  -p 
+    Prepopulate the database with sample data
+  ```
+  
