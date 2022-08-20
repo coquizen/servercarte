@@ -8,7 +8,7 @@ ServerCarte is the core backend for both GastroAdmin dashboard and Tribeca appli
 
 ## 3rd Party Libraries Used
 
-* [GORM](https://gorm.io) (an abstraction layer for multiple sql based databases) 
+* [GORM](https://gorm.io) (an abstraction layer for multiple sql based databases)
 * [dgrijalva/jwt-go](https://github.com/dgrijalva/jwt-go) (For JWT authentication)
 * [Gin-Gonic](https://gin-gonic.com) (Go Web Framework. A little bit overkill for this project's use case)
 
@@ -67,16 +67,20 @@ This project is based on the principles of [Clean Architecture](https://archive.
 
 
 ```
-Throughout this project I used the following template for each entity: 
+Throughout this project I used the following template for each domain:
 
 ```
-entity
+domain
 ├── model (consistings of structs)
 ├── repository (interfaces for persistent storage)
 └── service (interfaces containing application logic)
 ```
 
 In `/internal` the actual technology or framework is specified and implements interfaces as specified above. For further references, [zhashkevych/go-clean-architecture](https://github.com/zhashkevych/go-clean-architecture), [err0r500/go-realworld-clean](https://github.com/err0r500/go-realworld-clean).
+
+### Comments
+
+This was an exercise to familiarize myself with the principles of Clean Architecture. It became readily apparent that Go was not designed to implement these principles. Nevertheless, hopefully this will serve as a lesson for future reference.
 
 ## API Documentation
 
@@ -120,15 +124,13 @@ DELETE /account
 
 ## Getting Started
 
-First need to specify the database that will act as persistent storage. Fortunately [GORM](https://gorm.io) provides a choice between MySQL/ PostGreSQL, SQLite, SQLServer and Clickhouse. Set up the preferred database with the appropriate user privileges and create a database. 
+### Configuration (Required)
 
-This project also provides a choice in encryption technology to use for JWT as well as password policy settings.
-
-Populate `config.yml` and specify your configuration:
+First need to specify the database that will act as persistent storage. Fortunately [GORM](https://gorm.io) interfaces with the following [databases](https://gorm.io/docs/connecting_to_the_database.html): MySQL, PostGreSQL, SQLite, SQLServer, and Clickhouse. Set up the preferred database with the appropriate user privileges and create a database. This project also provides a choice in encryption technology to use for JWT as well as provide options to configure the password policy. To configure these settings, rename `config.yml.example` to `config.yml` and specify your configuration:
 
 ```yaml
 database:
-  type: <mysql|postgres|sqlite3> (default: mysql)
+  type: <mysql|postgres|sqlite|sqlserver|clickhouse> (default: mysql)
   host: <host> (default: localhost)
   port: <port> (default: 3306)
   user: <username>
@@ -151,7 +153,7 @@ security:
   special_char: <true|false> (default: false)
   check_previous: <true|false> (default: false)
   ```
-  
+
   _Hint: to generate a secret key run_
   `$ date +%s | sha256sum | base64 | head -c 64 ; echo`
   
