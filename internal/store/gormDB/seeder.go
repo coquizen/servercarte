@@ -2,6 +2,7 @@ package gormDB
 
 import (
 	"fmt"
+
 	"github.com/coquizen/servercarte/domain/account"
 	"github.com/coquizen/servercarte/domain/menu"
 	"github.com/coquizen/servercarte/domain/user"
@@ -35,12 +36,12 @@ func seedDB(db *gorm.DB) error {
 
 	logger.Info.Println("Seeding...")
 
-	everything := &menu.Item{Title: "Everything", Description: StrPtr("With onions, sesame seeds, & poppy seeds"), ListOrder : 1, Type: menu.AddOn, Price: 0, Active: true}
-	sesame := &menu.Item{Title: "Sesame Seed", ListOrder : 2, Type: menu.AddOn, Price: 0, Active: true}
-	poppy := &menu.Item{Title: "Poppy Seed", ListOrder : 3, Type: menu.AddOn, Price: 0, Active: true}
-	plain := &menu.Item{Title: "Plain", ListOrder : 4, Type: menu.AddOn, Price: 0, Active: true}
+	everything := &menu.Item{Title: "Everything", Description: StrPtr("With onions, sesame seeds, & poppy seeds"), ListOrder: 1, Type: menu.AddOn, Price: 0, Active: true}
+	sesame := &menu.Item{Title: "Sesame Seed", ListOrder: 2, Type: menu.AddOn, Price: 0, Active: true}
+	poppy := &menu.Item{Title: "Poppy Seed", ListOrder: 3, Type: menu.AddOn, Price: 0, Active: true}
+	plain := &menu.Item{Title: "Plain", ListOrder: 4, Type: menu.AddOn, Price: 0, Active: true}
 	chocolate := &menu.Item{Title: "Chocolate Chip", Description: StrPtr("With Godiva chocolate chips"), ListOrder: 5, Type: menu.AddOn, Price: 0, Active: true}
-	onion := &menu.Item{Title: "Onion", ListOrder : 6, Type: menu.AddOn, Price: 0, Active: true}
+	onion := &menu.Item{Title: "Onion", ListOrder: 6, Type: menu.AddOn, Price: 0, Active: true}
 
 	bagelcontainer := &menu.Section{Title: "Bagel Container", ListOrder: 0, Type: menu.Container, Items: []menu.Item{*everything, *chocolate, *sesame, *poppy, *plain, *onion}}
 
@@ -53,7 +54,7 @@ func seedDB(db *gorm.DB) error {
 
 	bagelcondimentcontainer := &menu.Section{Title: "Bagel Condiments",
 		ListOrder: 0, Type: menu.Container, Active: true, Visible: false,
-		Items: []menu.Item{*plaincreamcheese, *scallioncreamcheese, *lightplaincreamcheese, *onionandchivecreamcheese,*garliccreamcheese, *smokedsalmoncreamcheese }}
+		Items: []menu.Item{*plaincreamcheese, *scallioncreamcheese, *lightplaincreamcheese, *onionandchivecreamcheese, *garliccreamcheese, *smokedsalmoncreamcheese}}
 
 	bagel := &menu.Item{Title: "Bagel", Description: StrPtr("Your choice of bagel."), Type: menu.Plate, ListOrder: 1, Price: 395, Active: true, AddOns: *bagelcontainer}
 	bagelwcreamcheese := &menu.Item{Title: "Bagel w/ Cream Cheese", Description: StrPtr("Toasted H&H Bagel with your choice of cream cheese."), Type: menu.Plate, ListOrder: 2, Price: 595, Active: true, AddOns: *bagelcontainer, Condiments: *bagelcondimentcontainer}
@@ -62,11 +63,11 @@ func seedDB(db *gorm.DB) error {
 	bagels := menu.Section{Title: "Bagels", ListOrder: 1, Type: menu.Category, Items: []menu.Item{*bagelwcreamcheese, *bagelwlox, *bagel}}
 
 	maplesyrup := &menu.Item{Title: "Canadian Maple Syrup", ListOrder: 1, Type: menu.Condiment, Price: 0, Active: true}
-	butter := &menu.Item{Title: "Butter", ListOrder: 2, Type:menu.Condiment, Price: 0, Active: true}
+	butter := &menu.Item{Title: "Butter", ListOrder: 2, Type: menu.Condiment, Price: 0, Active: true}
 
 	wafflecondiments := &menu.Section{Title: "Waffle Condiments", ListOrder: 0, Type: menu.Container, Visible: false, Items: []menu.Item{*maplesyrup, *butter}}
 
-	waffle := &menu.Item{Title: "Waffles", Description: StrPtr("5 slices of thick homemade waffles with light cream."), Type: menu.Plate, ListOrder: 1, Price: 775, Active: true, Condiments: *wafflecondiments	}
+	waffle := &menu.Item{Title: "Waffles", Description: StrPtr("5 slices of thick homemade waffles with light cream."), Type: menu.Plate, ListOrder: 1, Price: 775, Active: true, Condiments: *wafflecondiments}
 	montecristowaffle := &menu.Item{Title: "Monte Cristo Waffle Sandwich", Description: StrPtr("Whole wheat Waffle sandwich with swiss cheese, raspberry jam, honey baked, and ham."), Type: menu.Plate, ListOrder: 2, Price: 1125, Active: true, Condiments: *wafflecondiments}
 	spicywaffle := &menu.Item{Title: "Southern Waffle Sandwich", Description: StrPtr("Belgian waffles with spicy maple syrup, cheddar cheese, butter and cinnamon."), Type: menu.Plate, ListOrder: 3, Price: 1035, Active: true, Condiments: *wafflecondiments}
 
@@ -76,7 +77,7 @@ func seedDB(db *gorm.DB) error {
 	eggsbenedict := &menu.Item{Title: "Eggs Benedict", Description: StrPtr("Eggs Benedict with homemade Hollandaise sauce."), ListOrder: 2, Type: menu.Plate, Price: 775, Active: true}
 	countryomelettes := &menu.Item{Title: "Country Omelettes", Description: StrPtr("Omelette stuffed with chorizo, green peppers, onion, and Manchego cheese."), ListOrder: 3, Type: menu.Plate, Price: 1295, Active: true}
 	classicomelettes := &menu.Item{Title: "Classic Omelettes", Description: StrPtr("Omelette with select herbs and freshly ground black pepper."), ListOrder: 4, Type: menu.Plate, Price: 1095, Active: true}
-	westernomelette := &menu.Item{Title: "Western Omelettes", Description: StrPtr("Omelette with green bell pepper, red bell pepper, and Monterrey jack."), ListOrder: 5,  Type: menu.Plate, Price: 995, Active: true}
+	westernomelette := &menu.Item{Title: "Western Omelettes", Description: StrPtr("Omelette with green bell pepper, red bell pepper, and Monterrey jack."), ListOrder: 5, Type: menu.Plate, Price: 995, Active: true}
 
 	eggs := menu.Section{Title: "Eggs & Omelettes", ListOrder: 3, Type: menu.Category, Items: []menu.Item{*eggsbenedict, *eggswbacon, *countryomelettes, *classicomelettes, *westernomelette}}
 	//_ = db.Model(&eggs).Association("Items").Append([]menu.Item{*eggsbenedict, *eggswbacon, *countryomelettes, *classicomelettes, *westernomelette})
@@ -93,7 +94,7 @@ func seedDB(db *gorm.DB) error {
 
 	salads := menu.Section{Title: "Salads", Type: menu.Category, Items: []menu.Item{sunomonosalad, cobbsalad}, Active: true, Visible: true, ListOrder: 1}
 
-	classictunamelt := menu.Item{Title: "Classic Tuna Melt", Description: StrPtr("Sourdough bread, fresh tuna, red onions, dill pickles, celery and butter."), Type: menu.Plate, ListOrder: 1,Price: 895, Active: true}
+	classictunamelt := menu.Item{Title: "Classic Tuna Melt", Description: StrPtr("Sourdough bread, fresh tuna, red onions, dill pickles, celery and butter."), Type: menu.Plate, ListOrder: 1, Price: 895, Active: true}
 	hamdandcheesesandwich := menu.Item{Title: "Perfect Ham and Cheese Sandwich", Description: StrPtr("Sourdough bread, swiss cheese, ham, honey, mustard, mayonnaise, and pickle."), ListOrder: 2, Type: menu.Plate, Price: 995, Active: true}
 	lemonchickenwraps := menu.Item{Title: "Lemon Chicken Wrap", Description: StrPtr("Pita bread, grilled chicken breast, greek yogurt, garlic, Sriracha sauce, paprika."), Type: menu.Plate, ListOrder: 3, Price: 1095, Active: true}
 	hasselbacktomatoclubs := menu.Item{Title: "Hassel Back Tomato Club", Description: StrPtr("Bibb lettuce leaves, ripe avocados, swiss cheese, plum tomatoes, and turkey"), Type: menu.Plate, ListOrder: 4, Price: 1095, Active: true}
@@ -101,7 +102,7 @@ func seedDB(db *gorm.DB) error {
 	sandwiches := menu.Section{Title: "Sandwiches", ListOrder: 2, Type: menu.Category, Items: []menu.Item{classictunamelt, hamdandcheesesandwich, lemonchickenwraps, hasselbacktomatoclubs}}
 
 	carrotgingersoup := menu.Item{Title: "Carrot Ginger Soup", Description: StrPtr("Carrot ginger soup with coconut milk, apple cider vinegar, and maple syrup"), Type: menu.Plate, ListOrder: 1, Price: 895, Active: true}
-	classicchickensoup := menu.Item{Title: "Homemade Chicken Soup", Description: StrPtr("Chicken soup with Israeli couscous."), Type: menu.Plate, ListOrder: 2 ,Price: 695, Active: true}
+	classicchickensoup := menu.Item{Title: "Homemade Chicken Soup", Description: StrPtr("Chicken soup with Israeli couscous."), Type: menu.Plate, ListOrder: 2, Price: 695, Active: true}
 
 	soups := menu.Section{Title: "Soups", ListOrder: 3, Type: menu.Category, Items: []menu.Item{carrotgingersoup, classicchickensoup}}
 
@@ -131,14 +132,17 @@ func seedDB(db *gorm.DB) error {
 	cheesecake := menu.Item{Title: "Housemade Cheesecake with Fresh Strawberries", Description: StrPtr("Warm chocolate sauce"), Type: menu.Plate, ListOrder: 3, Price: 1295, Active: true}
 	gastrotartufo := menu.Item{Title: "Gastro's Tartufo", Description: StrPtr("Van Leeuwen Chocolate & Vanilla Bean Ice Cream rolled in Chocolate Chunks"), Type: menu.Plate, ListOrder: 4, Price: 1225, Active: true}
 
-	desserts := menu.Section{Title: "Desserts", Type: menu.Meal, ListOrder: 4, Items: []menu.Item{chocolatemousse,tiramisu, cheesecake, gastrotartufo}}
+	desserts := menu.Section{Title: "Desserts", Type: menu.Meal, ListOrder: 4, Items: []menu.Item{chocolatemousse, tiramisu, cheesecake, gastrotartufo}}
 	db.Create(&desserts)
 	logger.Info.Println("Successful")
 
 	// Now create admin user/account
-	logger.Info.Println("Creating default admin user/account...")
-	password := "administrator"
+	logger.Info.Println("Creating default admin accounts with 'admin'/'password' as credentialing pair")
+
+	// create the default password, then hash it
+	password := "password"
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
 	db.Create(&account.Account{
 		Username: "admin",
 		Password: string(hashedPassword),
